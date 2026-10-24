@@ -177,12 +177,49 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .q.story{font-family:var(--body);font-weight:700;font-size:clamp(1.15rem,4.4vw,1.5rem);line-height:1.35;max-width:32ch}
 .pat{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
 .qbox{width:46px;height:46px;box-sizing:border-box;border:3px dashed var(--pc);border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.6rem;color:var(--pc)}
-.ans .shp{display:inline-block;vertical-align:middle}
+.ans .shp{display:inline-block;vertical-align:middle;width:84px;height:84px}
 .coins{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;max-width:360px}
 .coin{border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:.8rem;color:var(--coinink);background:var(--silver);border:3px solid color-mix(in srgb,var(--silver) 60%,#000);box-sizing:border-box}
 .coin.p{width:40px;height:40px;background:var(--copper);border-color:color-mix(in srgb,var(--copper) 60%,#000)}
 .coin.n{width:46px;height:46px}.coin.d{width:36px;height:36px;font-size:.7rem}.coin.q{width:56px;height:56px;font-size:.9rem}
 .addvis .pie{width:120px;height:120px}
+/* Kid mode, coach, round end */
+.kid{display:grid;justify-items:center;gap:14px;margin:4px 0 22px;text-align:center}
+.hi{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,8vw,3rem);margin:0;line-height:1}
+.bigplay{width:min(340px,82vw);aspect-ratio:2.3;border-radius:34px;background:var(--pc);color:#fff;display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--display);font-weight:800;font-size:2.8rem;box-shadow:0 8px 0 color-mix(in srgb,var(--pc) 60%,#000);animation:breathe 2.2s ease-in-out infinite}
+.bigplay svg{width:58px;height:58px;fill:#fff}
+.bigplay:active{animation:none;transform:translateY(5px);box-shadow:0 3px 0 color-mix(in srgb,var(--pc) 60%,#000)}
+@keyframes breathe{50%{transform:scale(1.045)}}
+.pickg{color:var(--muted);font-weight:700;margin:8px 0 0;font-size:1.15rem}
+.mods.kidmods{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.kidmods .mod{padding:18px}.kidmods .mod .gl{width:76px;height:76px;font-size:1.9rem;border-radius:18px}.kidmods .mod h3{font-size:1.5rem}
+.mod.done{border-color:var(--star);box-shadow:0 4px 0 color-mix(in srgb,var(--star) 55%,var(--line))}
+.trophy{justify-self:start;font-size:.78rem;font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--star) 40%,var(--card));border-radius:99px;padding:3px 10px}
+.roundname{font-family:var(--display);font-weight:700;color:var(--muted);font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38%;flex:none}
+.btn.big{font-size:1.5rem;padding:14px 30px}
+.pulse{animation:breathe 1.8s ease-in-out infinite}
+.over .box{max-height:88vh;overflow:auto;box-sizing:border-box;width:100%}
+.coachrow{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.cstep{display:grid;justify-items:center;gap:8px}
+.cic{width:64px;height:64px;border-radius:50%;background:var(--pcsoft);display:grid;place-items:center}
+.cic.big{width:84px;height:84px}.cic.big svg{width:44px;height:44px}
+.cic svg{width:34px;height:34px;stroke:var(--pc);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.carrow{font-size:2rem;color:var(--muted);font-family:var(--display)}
+.demo{position:relative;width:84px;height:64px;border-radius:16px;border:3px solid var(--line);background:var(--card);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:2rem}
+.hand{position:absolute;width:44px;height:44px;right:-18px;bottom:-24px;animation:tap 1.2s ease-in-out infinite}
+@keyframes tap{50%{transform:translate(-6px,-8px)}}
+.starrow{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}.starrow svg{width:28px;height:28px}.starrow .on{fill:var(--star)}.starrow .off{fill:var(--line)}
+.mprog{width:100%;box-sizing:border-box;display:grid;gap:8px;text-align:left;background:var(--paper);border-radius:16px;padding:12px}
+.mprog small{color:var(--muted)}
+.meter{display:flex;gap:4px}.meter i{flex:1;height:10px;border-radius:99px;background:var(--line)}.meter i.ok{background:var(--good)}.meter i.no{background:var(--bad)}
+.trophyart{width:96px;height:96px;animation:pop .5s ease-out}
+.answers.nudge .ans{animation:wiggle .6s ease-in-out 2}
+@keyframes wiggle{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+.grown{margin-top:30px;border-top:2px dashed var(--line);padding-top:16px;display:grid;gap:8px}
+.glabel{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.vrow{display:flex;gap:10px;flex-wrap:wrap}
+.vrow select{flex:1 1 220px;min-width:0;font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
+.vrow .btn{font-size:1rem;padding:10px 18px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -203,6 +240,13 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <button class="btn ghost" id="confirmNo">Keep</button>
     </div>
     <p style="text-align:center;margin-top:18px"><button class="link" id="editBtn">Edit players</button></p>
+    <div class="grown">
+      <span class="glabel">For grown-ups</span>
+      <label for="voiceSel" style="font-weight:700">Reading voice</label>
+      <div class="vrow"><select id="voiceSel"></select><button class="btn ghost" id="voiceTest" type="button">Test</button></div>
+      <p class="hint" id="voiceNote"></p>
+      <p class="hint">On iPad, a more natural voice is free: Settings, Accessibility, Spoken Content, Voices, English. Download an "Enhanced" or "Premium" voice, then pick it here.</p>
+    </div>
   </section>
 
   <!-- ADD PLAYER -->
@@ -228,7 +272,12 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <span class="sp"></span>
       <span class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><span id="mStars">0</span></span>
     </div>
-    <div class="hero">
+    <div class="kid" id="kidTop" hidden>
+      <p class="hi" id="kidHi"></p>
+      <button class="bigplay" id="kidPlay" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15a1 1 0 001.5.9l12-7.5a1 1 0 000-1.8l-12-7.5A1 1 0 007 4.5z"/></svg><span>Play</span></button>
+      <p class="pickg">or pick a game</p>
+    </div>
+    <div class="hero" id="hero">
       <p class="now">Climbing now<b id="mNow"></b></p>
       <div class="bar" aria-hidden="true"><i id="mBar"></i></div>
       <p class="now" id="mCount" style="font-size:.95rem"></p>
@@ -237,16 +286,17 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       </div>
       <p class="now" style="font-size:.9rem;margin-top:-4px">Climb mixes everything and picks the next skill for you.</p>
     </div>
-    <h3 class="sect">Games</h3>
+    <h3 class="sect" id="gamesH">Games</h3>
     <div class="mods" id="mods"></div>
-    <p class="summit">Summit</p>
-    <div class="mount" id="mount"></div>
+    <p style="text-align:center;margin:0 0 20px"><button class="link" id="allBtn" hidden>Grown-ups: show all games and the map</button></p>
+    <div id="mountWrap"><p class="summit">Summit</p><div class="mount" id="mount"></div></div>
   </section>
 
   <!-- PLAY -->
   <section id="play" hidden>
     <div class="top">
       <button class="iconbtn" id="quitBtn" aria-label="Stop playing"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <span class="roundname" id="roundName"></span>
       <div class="prog" id="prog"></div>
     </div>
     <div class="qcard">
@@ -403,6 +453,11 @@ function volSVG(l,w,h){
   const W=X+l*u+w*dx+30,H=Y+h*u+26;
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:100%;height:auto" role="img" aria-label="box ${l} by ${w} by ${h}">${s}</svg>`;
 }
+function findShape(all,targets=all){
+  const k=pick(targets);const opts=shuffle([k,...shuffle(all.filter(x=>x!==k)).slice(0,3)]);const cols=shuffle([1,2,3,4]);
+  const oh={},lab={};opts.forEach((o,i)=>{oh[o]=shapeSVG(o,C[cols[i]],70);lab[o]='the '+o});
+  return{q:`Find the ${k}`,a:k,opts,oh,lab,vis:`<span class="cic big" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></span>`,say:`Tap the ${k}!`};
+}
 const CMP=['<','=','>'],CMPL={'<':'less than','=':'equal to','>':'greater than'};
 function cmpQ(q,x,y,say,vis=''){return{q,a:x<y?'<':x>y?'>':'=',opts:CMP.slice(),lab:CMPL,vis,say}}
 const PAL=[['Pip the pup','he'],['Lulu the cat','she'],['Max the frog','he'],['Rosie the hen','she'],['Gus the goat','he'],['Bea the bear','she']];
@@ -411,13 +466,14 @@ const SUP={2:'²',3:'³',4:'⁴'};
 
 /* ---------- new skills (added to the ladder below) ---------- */
 const SK1=[
- {id:'shapes',g:'K',n:'Shapes',f:()=>{const k=pick(['circle','square','triangle','rectangle','oval','star']);return U('What shape is this?',cap(k),['Circle','Square','Triangle','Rectangle','Oval','Star'],{vis:shapeSVG(k,C[r(1,4)],140)})}},
+ /* Non-readers: the app says the shape name and the kid taps the picture. No reading needed. */
+ {id:'shapes',g:'K',n:'Shapes',f:()=>findShape(['circle','square','triangle','rectangle','oval','star'])},
  {id:'next',g:'K',n:'What comes next?',f:()=>{if(Math.random()<.75){const n=r(0,7);return N(`${n}, ${n+1}, ${n+2}, ?`,n+3,{say:`${n}, ${n+1}, ${n+2}. What comes next?`})}const m=r(2,9);return N(`?, ${m}, ${m+1}`,m-1,{say:`What number comes before ${m}?`})}},
  {id:'pattern',g:'K',n:'Patterns',f:()=>{const t=pick([[0,1],[0,0,1],[0,1,1],[0,1,2]]);const sh=shuffle(['circle','square','triangle','star']),co=shuffle([1,2,3,4]);const tok=i=>`${sh[i]}|${co[i]}`;const L=Math.max(5,t.length*2);const seq=[...Array(L)].map((_,i)=>tok(t[i%t.length]));const a=tok(t[L%t.length]);const opts=shuffle([...new Set(t)].map(tok).concat(tok(Math.max(...t)+1)));const oh={},lab={};opts.forEach(o=>{oh[o]=tokSVG(o,64);const [s,c]=o.split('|');lab[o]=`the ${CN[c]} ${s}`});return{q:'What comes next?',a,opts,oh,lab,vis:`<div class="pat">${seq.map(x=>tokSVG(x,46)).join('')}<span class="qbox">?</span></div>`,say:'What comes next in the pattern?'}}},
  {id:'compare',g:'1',n:'Greater or less',f:()=>{const a=r(0,99);const b=Math.random()<.15?a:r(0,99);return cmpQ(`${a}  ?  ${b}`,a,b,`Is ${a} less than, equal to, or greater than ${b}?`)}},
  {id:'doubles',g:'1',n:'Doubles',f:()=>{const a=r(1,10);return N(`${a} + ${a}`,2*a,{vis:a<=6?addVis(a,a):''})}},
  {id:'missadd',g:'1',n:'Missing number',f:()=>{const c=r(6,20),a=r(1,c-1);return N(`${a} + ? = ${c}`,c-a,{say:`${a} plus what equals ${c}?`})}},
- {id:'shapes2',g:'1',n:'More shapes',f:()=>{const SD={triangle:3,square:4,rectangle:4,rhombus:4,trapezoid:4,pentagon:5,hexagon:6,octagon:8};const k=pick(Object.keys(SD));if(Math.random()<.5)return N('How many sides?',SD[k],{vis:shapeSVG(k,C[r(1,4)],140)});const k2=pick(['rhombus','trapezoid','pentagon','hexagon','octagon']);return U('What shape is this?',cap(k2),['Rhombus','Trapezoid','Pentagon','Hexagon','Octagon','Square'],{vis:shapeSVG(k2,C[r(1,4)],140)})}},
+ {id:'shapes2',g:'1',n:'More shapes',f:()=>{const SD={triangle:3,square:4,rectangle:4,rhombus:4,trapezoid:4,pentagon:5,hexagon:6,octagon:8};const k=pick(Object.keys(SD));if(Math.random()<.5)return N('How many sides?',SD[k],{vis:shapeSVG(k,C[r(1,4)],140)});return findShape(['rhombus','trapezoid','pentagon','hexagon','octagon','square','triangle'],['rhombus','trapezoid','pentagon','hexagon','octagon'])}},
  {id:'timehr',g:'1',n:'Clocks: hour and half hour',f:()=>{const h=r(1,12),m=pick([0,30]);return U('What time is it?',fmtT(h,m),[fmtT(h,30-m),fmtT(h+1,m),fmtT(h-1,m),fmtT(h+1,30-m)],{vis:clockSVG(h,m)})}},
  {id:'word1',g:'1',n:'Story problems to 20',f:()=>{const [nm,pr]=pick(PAL),th=pick(TH);if(Math.random()<.5){const a=r(3,12),b=r(2,8);return N(`${nm} has ${a} ${th}. ${cap(pr)} finds ${b} more. How many ${th} now?`,a+b)}const a=r(8,18),b=r(2,a-2);return N(`${nm} has ${a} ${th}. ${cap(pr)} gives ${b} away. How many are left?`,a-b)}},
  {id:'placeval',g:'2',n:'Place value',f:()=>{const n=r(100,999),ds=String(n),i=r(0,2),pl=['hundreds','tens','ones'][i];return U(`In ${n}, which digit is in the ${pl} place?`,ds[i],[...ds,...shuffle('0123456789'.split(''))])}},
@@ -517,7 +573,31 @@ function record(p,i,ok,ms,pool=ALL){
 
 /* ---------- speech ---------- */
 function speakable(t){return t.replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals ').replace(/(^|\s)\?(\s|$)/g,' what ').replace(/(\d)\/(\d)/g,'$1 over $2').replace(/(\d)¢/g,'$1 cents')}
-function speak(t){try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(speakable(t));u.rate=.9;u.pitch=1.1;speechSynthesis.speak(u)}catch(e){}}
+/* Pick the most natural voice the device has. Edge "Natural" voices and iPad "Enhanced/Premium" voices sound human;
+   the old built-in defaults sound flat. A grown-up can override on the home screen. */
+let VOICE=null;
+const NOVELTY=/Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Junior|Organ|Pipe Organ|Ralph|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Kathy|Grandma|Grandpa|Rocko|Shelley|Sandy|Flo|Eddy|Reed/i;
+function voiceScore(v){
+  if(!/^en/i.test(v.lang))return -1;const n=v.name;if(NOVELTY.test(n))return 0;let s=1;
+  if(/Natural|Neural/i.test(n))s+=100;if(/Premium/i.test(n))s+=90;if(/Enhanced/i.test(n))s+=80;
+  if(/Google US English/i.test(n))s+=45;if(/Google UK English Female/i.test(n))s+=40;
+  if(/Ava|Samantha|Allison|Susan|Zoe|Joelle|Nicky|Aria|Jenny|Emma|Michelle|Ana\b/i.test(n))s+=30;
+  if(/en[-_]US/i.test(v.lang))s+=10;return s;
+}
+function voiceList(){try{return speechSynthesis.getVoices().filter(v=>voiceScore(v)>0).sort((a,b)=>voiceScore(b)-voiceScore(a))}catch(e){return[]}}
+function loadVoice(){const L=voiceList();VOICE=(DB.voice&&L.find(v=>v.name===DB.voice))||L[0]||null;if(!$('#home').hidden)renderVoicePicker()}
+try{loadVoice();speechSynthesis.onvoiceschanged=loadVoice}catch(e){}
+const MOOD={q:[.95,1.05],cheer:[1.05,1.25],calm:[.92,1]};
+function speak(t,mood='q',done){try{if(!('speechSynthesis' in window)){done&&done();return}speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(speakable(t));if(VOICE){u.voice=VOICE;u.lang=VOICE.lang}
+  const natural=VOICE&&/Natural|Neural|Premium|Enhanced/i.test(VOICE.name);const [rt,pt]=MOOD[mood]||MOOD.q;
+  u.rate=rt;u.pitch=natural?1+(pt-1)/2:pt; /* natural voices already have expression; nudge them less */
+  if(done)u.onend=done;setTimeout(()=>speechSynthesis.speak(u),60);}catch(e){done&&done()}}
+function renderVoicePicker(){
+  const sel=$('#voiceSel');if(!sel)return;const L=voiceList();
+  sel.innerHTML='<option value="">Best available</option>'+L.map(v=>`<option value="${esc(v.name)}" ${DB.voice===v.name?'selected':''}>${esc(v.name)}</option>`).join('');
+  $('#voiceNote').textContent=VOICE?`Using: ${VOICE.name}`:'This device has no reading voice.';
+}
 
 /* ---------- navigation ---------- */
 const SECTIONS=['home','add','map','play','grid'];
@@ -538,8 +618,11 @@ function renderHome(){
   });
   const a=document.createElement('button');a.className='pcard add';a.textContent='+ Add player';a.onclick=()=>go('add');box.appendChild(a);
   $('#editBtn').textContent=editing?'Done editing':'Edit players';$('#editBtn').hidden=!DB.players.length;
+  renderVoicePicker();
 }
 $('#editBtn').onclick=()=>{editing=!editing;$('#confirmDel').hidden=true;renderHome()};
+$('#voiceSel').onchange=e=>{DB.voice=e.target.value||null;save();loadVoice();speak("Hi! Let's do some math. What is 3 plus 4?")};
+$('#voiceTest').onclick=()=>speak("Hi! Let's do some math. What is 3 plus 4?");
 $('#confirmNo').onclick=()=>{$('#confirmDel').hidden=true;pendingDel=null};
 $('#confirmYes').onclick=()=>{DB.players=DB.players.filter(p=>p.id!==pendingDel);save();$('#confirmDel').hidden=true;editing=false;renderHome()};
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
@@ -574,53 +657,107 @@ function renderMap(){
     row.innerHTML=`<div class="g">${g==='K'?'K':l}<small>${g==='K'?'start':'grade'}</small></div><div class="chips">${sk.map(([s,i])=>`<span class="chip ${st(P,s.id).m?'done':i===fi?'cur':''}" ${i===fi?'id="curChip"':''}>${s.n}</span>`).join('')}</div>`;
     m.appendChild(row);
   });
-  const rank=fi>=0?GR[SK[fi].g]:7,mods=$('#mods');mods.innerHTML='';
-  MODULES.forEach(M=>{
+  const rank=climbRank(P),kid=isKid(P),mods=$('#mods');mods.innerHTML='';
+  /* Kid mode (K and 1st): one giant Play button, a few big game tiles at their level, no map. */
+  $('#kidTop').hidden=!kid;$('#hero').hidden=kid;$('#gamesH').hidden=kid;$('#mountWrap').hidden=kid;$('#allBtn').hidden=!kid;
+  mods.classList.toggle('kidmods',kid);
+  $('#kidHi').textContent=`Hi, ${P.name}!`;
+  MODULES.filter(M=>!kid||(M.id!=='grid'&&GR[SK[M.pool[0]].g]<=rank)).forEach(M=>{
     const b=document.createElement('button');b.className='mod';
     if(M.id==='grid'){b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>Push a button, see the answer</small>`;b.onclick=()=>go('grid')}
-    else{const mc=masteredCount(P,M.pool),mf=frontier(P,M.pool),ready=mf>=0&&GR[SK[mf].g]<=rank;
-      if(ready)b.classList.add('ready');
-      b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>${mf>=0?'Next: '+esc(SK[mf].n):'All mastered!'}</small><span class="mb" aria-label="${mc} of ${M.pool.length} done"><i style="width:${mc/M.pool.length*100}%"></i></span>${ready?'<span class="tag">Ready for you</span>':''}`;
+    else{const mc=masteredCount(P,M.pool),mf=frontier(P,M.pool),done=mf<0,ready=!done&&GR[SK[mf].g]<=rank;
+      if(ready)b.classList.add('ready');if(done)b.classList.add('done');
+      b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>${done?'Play to stay sharp':esc(SK[mf].n)}</small><span class="mb" aria-label="${mc} of ${M.pool.length} skills done"><i style="width:${mc/M.pool.length*100}%"></i></span>${done?'<span class="trophy">Finished!</span>':ready&&!kid?'<span class="tag">Ready for you</span>':''}`;
       b.onclick=()=>startRound(M.pool,M.n)}
     mods.appendChild(b);
   });
+  if(kid&&P.read)speak(`Hi ${P.name}! Tap Play. Or pick a game.`,'cheer');
 }
+function climbRank(p){const fi=frontier(p);return fi>=0?GR[SK[fi].g]:7}
+let showAll=false;
+function isKid(p){return !showAll&&climbRank(p)<=1}
 $('#playBtn').onclick=()=>startRound(ALL,'Climb');
+$('#kidPlay').onclick=()=>startRound(ALL,'Climb');
+$('#allBtn').onclick=()=>{showAll=true;renderMap()};
+document.querySelector('[data-go="home"][aria-label="Switch player"]').addEventListener('click',()=>{showAll=false});
 
-/* ---------- play ---------- */
+/* ---------- play ----------
+   A round is 10 questions. A skill is mastered at 9 of its last 10 right.
+   A game is finished when every skill in it is mastered; after that it keeps serving review. */
 const ROUND=10;let R=null;
-function startRound(pool,name){R={i:0,res:[],stars:0,ups:[],pool:pool||ALL,name:name||'Climb'};go('play');next()}
+const STARSVG=c=>`<svg viewBox="0 0 24 24" class="${c}"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>`;
+const HAND=`<svg viewBox="0 0 64 64" class="hand" aria-hidden="true"><path d="M24 31V11a5 5 0 0110 0v16l12 3a6 6 0 014.5 7l-3 13a8 8 0 01-8 6.5H31a8 8 0 01-6.6-3.4L14.5 40a5 5 0 017.6-6.4z" style="fill:var(--card);stroke:var(--ink)" stroke-width="3" stroke-linejoin="round"/></svg>`;
+const SPK=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>`;
+function clearTimers(){if(!R)return;clearTimeout(R.tNext);clearTimeout(R.tIdle)}
+function startRound(pool,name){clearTimers();pool=pool||ALL;name=name||'Climb';
+  R={i:0,res:[],ups:[],pool,name,review:frontier(P,pool)<0};
+  $('#roundName').textContent=name+(R.review&&name!=='Climb'?' · review':'');go('play');next()}
 function next(){
-  if(R.i>=ROUND)return endRound();
+  clearTimers();if(R.i>=ROUND)return endRound();
   const si=chooseSkill(P,R.pool);const q=SK[si].f();R.cur={si,q,t0:performance.now(),done:false};
   const pg=$('#prog');pg.innerHTML='';for(let k=0;k<ROUND;k++){const d=document.createElement('i');if(k<R.res.length)d.className=R.res[k]?'ok':'no';else if(k===R.i)d.className='on';pg.appendChild(d)}
   $('#skName').textContent=SK[si].n;const qt=$('#qText');qt.textContent=q.q;qt.className='q'+(q.q.length>24?' story':q.q.length>14?' long':'');
   $('#qVis').innerHTML=q.vis||'';$('#fb').innerHTML='';
-  const an=$('#answers');an.innerHTML='';an.style.gridTemplateColumns=q.opts.length===3?'1fr 1fr 1fr':'1fr 1fr';
+  const bigSpk=$('#qVis .cic.big');if(bigSpk){bigSpk.setAttribute('role','button');bigSpk.setAttribute('aria-label','Hear it again');bigSpk.style.cursor='pointer';bigSpk.onclick=()=>speak(q.say||q.q)}
+  const an=$('#answers');an.innerHTML='';an.classList.remove('nudge');an.style.gridTemplateColumns=q.opts.length===3?'1fr 1fr 1fr':'1fr 1fr';
   q.opts.forEach(o=>{const b=document.createElement('button');b.className='ans';b.dataset.v=o;if(q.oh&&q.oh[o])b.innerHTML=q.oh[o];else b.textContent=o;b.setAttribute('aria-label',(q.lab&&q.lab[o])||o);b.onclick=()=>answer(b,o);an.appendChild(b)});
-  if(P.read)speak(q.say||q.q);
+  if(!P.coached)return coach();
+  ask();
+}
+function ask(){
+  if(P.read)speak(R.cur.q.say||R.cur.q.q);
+  /* little ones who stall: after a while, read it again and wiggle the answers */
+  if(isKid(P))R.tIdle=setTimeout(()=>{if(R.cur.done)return;$('#answers').classList.add('nudge');if(P.read)speak((R.cur.q.say||R.cur.q.q)+' Tap an answer.')},14000);
+}
+function coach(){
+  $('#overBox').innerHTML=`<h2>How to play</h2><div class="coachrow"><div class="cstep"><span class="cic">${SPK}</span><b>Listen</b></div><span class="carrow">→</span><div class="cstep"><span class="demo">5${HAND}</span><b>Tap the answer</b></div></div><p>Get it right and you earn a star.</p><button class="btn big pulse" id="coachOk">OK!</button>`;
+  $('#over').hidden=false;if(P.read)speak('Listen to the question. Then tap the answer you think is right!','cheer');
+  $('#coachOk').onclick=()=>{$('#over').hidden=true;P.coached=true;save();ask()};
 }
 function answer(btn,o){
-  const c=R.cur;if(c.done)return;c.done=true;const ok=o===c.q.a;const ms=performance.now()-c.t0;
+  const c=R.cur;if(c.done)return;c.done=true;clearTimers();$('#answers').classList.remove('nudge');
+  const ok=o===c.q.a;const ms=performance.now()-c.t0;
   document.querySelectorAll('.ans').forEach(b=>{b.disabled=true;if(b.dataset.v===c.q.a&&ok)b.classList.add('right')});
-  const ev=record(P,c.si,ok,ms,R.pool);if(ev)R.ups.push(ev);R.res.push(ok);R.i++;
+  const wasDone=frontier(P,R.pool)<0;
+  const ev=record(P,c.si,ok,ms,R.pool);if(ev)R.ups.push(ev.up);R.res.push(ok);R.i++;
+  const finished=!wasDone&&frontier(P,R.pool)<0;if(finished)R.finished=true;
   const spoken=(c.q.lab&&c.q.lab[c.q.a])||c.q.a;
-  if(ok){R.stars++;$('#fb').innerHTML=`<span class="yay">${pick(['Yes!','Nice!','You got it!','Great job!','Awesome!'])}</span>`;setTimeout(()=>ev?celebrate(ev,next):next(),800)}
+  const after=()=>finished?finishGame(next):ev?celebrate(ev,next):next();
+  if(ok){const w=pick(['Yes!','Nice!','You got it!','Great job!','Awesome!','Super!']);$('#fb').innerHTML=`<span class="yay">${w}</span>`;
+    if(P.read)speak(w,'cheer');R.tNext=setTimeout(after,1300)}
   else{btn.classList.add('wrong');document.querySelectorAll('.ans').forEach(b=>{if(b.dataset.v===c.q.a)b.classList.add('right')});
-    $('#fb').innerHTML=`<p>${c.q.oh?'It\'s the green one.':'It\'s '+esc(c.q.a)+'.'}</p><button class="btn" id="nextBtn">Next</button>`;$('#nextBtn').onclick=()=>next();
-    if(P.read)speak(`It's ${spoken}`);}
+    $('#fb').innerHTML=`<p>${c.q.oh?'It\'s the green one.':'It\'s '+esc(c.q.a)+'.'}</p><button class="btn" id="nextBtn">Next</button>`;
+    const go2=()=>{clearTimers();after()};$('#nextBtn').onclick=go2;
+    /* move on by itself so a 5-year-old is never stuck; Next skips the wait */
+    R.tNext=setTimeout(go2,4200);if(P.read)speak(`Good try. It's ${spoken}.`,'calm');}
 }
 function celebrate(ev,then){
-  $('#overBox').innerHTML=`<svg class="bigstar" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><h2>New skill!</h2><p>You mastered <b>${esc(ev.up)}</b>.</p>${ev.next?`<p>Next climb: <b>${esc(ev.next)}</b></p>`:'<p>You reached the summit!</p>'}<button class="btn" id="overOk">Keep going</button>`;
-  $('#over').hidden=false;if(P.read)speak(`New skill! You mastered ${ev.up}.`);$('#overOk').onclick=()=>{$('#over').hidden=true;then()};
+  $('#overBox').innerHTML=`${STARSVG('bigstar')}<h2>New skill!</h2><p>You learned <b>${esc(ev.up)}</b>.</p>${ev.next?`<p>Next up: <b>${esc(ev.next)}</b></p>`:''}<button class="btn big pulse" id="overOk">Keep going</button>`;
+  $('#over').hidden=false;if(P.read)speak(`New skill! You learned ${ev.up}!`,'cheer');$('#overOk').onclick=()=>{$('#over').hidden=true;then()};
+}
+function nextGame(){const rank=climbRank(P);return MODULES.find(M=>M.id!=='grid'&&M.n!==R.name&&frontier(P,M.pool)>=0&&GR[SK[frontier(P,M.pool)].g]<=rank)}
+function finishGame(then){
+  const climb=R.name==='Climb',ng=nextGame();
+  $('#overBox').innerHTML=`<svg viewBox="0 0 64 64" class="trophyart" aria-hidden="true"><path d="M18 8h28v14a14 14 0 01-28 0z" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/><path d="M18 12H9a9 9 0 009 12M46 12h9a9 9 0 01-9 12" style="fill:none;stroke:var(--ink)" stroke-width="3"/><path d="M28 36h8v10h-8z" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/><rect x="20" y="46" width="24" height="9" rx="2" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/></svg>
+    <h2>${climb?'You reached the top!':'You finished '+esc(R.name)+'!'}</h2><p>${climb?'Every skill on the mountain. Amazing.':'You learned every skill in this game.'}</p>
+    <div class="toolrow" style="margin:0">${ng?`<button class="btn big pulse" id="ngBtn">Try ${esc(ng.n)}</button>`:''}<button class="btn ghost" id="keepBtn">Keep playing</button></div>`;
+  $('#over').hidden=false;if(P.read)speak(climb?'You reached the top of the mountain!':`You finished ${R.name}! ${ng?'Next, try '+ng.n+'.':''}`,'cheer');
+  if(ng)$('#ngBtn').onclick=()=>{$('#over').hidden=true;startRound(ng.pool,ng.n)};
+  $('#keepBtn').onclick=()=>{$('#over').hidden=true;then()};
 }
 function endRound(){
-  const ok=R.res.filter(Boolean).length;
-  $('#overBox').innerHTML=`<svg class="bigstar" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><h2>${ok} stars!</h2><p>${ok>=8?'Super climbing.':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p><div class="toolrow" style="margin:0"><button class="btn" id="againBtn">Play again</button><button class="btn ghost" id="mapBtn">Back to games</button></div>`;
-  $('#over').hidden=false;if(P.read)speak(`${ok} stars!`);
-  $('#againBtn').onclick=()=>{$('#over').hidden=true;startRound()};$('#mapBtn').onclick=()=>{$('#over').hidden=true;go('map')};
+  clearTimers();const ok=R.res.filter(Boolean).length,pool=R.pool,mc=masteredCount(P,pool),mf=frontier(P,pool);
+  const hist=mf>=0?st(P,SK[mf].id).h:[];const right=sum(hist.slice(-10));
+  const meter=mf>=0?`<div class="meter" aria-label="${right} of last 10 right">${[...Array(10)].map((_,k)=>{const v=hist.slice(-10)[k];return `<i class="${v===1?'ok':v===0?'no':''}"></i>`}).join('')}</div><small>Working on <b>${esc(SK[mf].n)}</b>. Get 9 of 10 right to learn it.</small>`:'<small>Everything here is learned. These rounds keep it sharp.</small>';
+  $('#overBox').innerHTML=`<h2>${ok} star${ok===1?'':'s'}!</h2><div class="starrow">${R.res.map(x=>STARSVG(x?'on':'off')).join('')}</div>
+    <p>${ok>=8?'Super work!':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p>
+    ${R.ups.length?`<p>New skill${R.ups.length>1?'s':''}: <b>${R.ups.map(esc).join(', ')}</b></p>`:''}
+    <div class="mprog"><b>${esc(R.name)}</b><div class="bar"><i style="width:${mc/pool.length*100}%"></i></div><small>${mc} of ${pool.length} skills learned</small>${meter}</div>
+    <div class="toolrow" style="margin:0"><button class="btn big pulse" id="againBtn">Play again</button><button class="btn ghost" id="mapBtn">Back</button></div>`;
+  $('#over').hidden=false;if(P.read)speak(`You got ${ok} star${ok===1?'':'s'}! Tap Play again to keep going.`,'cheer');
+  $('#againBtn').onclick=()=>{$('#over').hidden=true;startRound(R.pool,R.name)};$('#mapBtn').onclick=()=>{$('#over').hidden=true;go('map')};
 }
-$('#quitBtn').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}go('map')};
+$('#quitBtn').onclick=()=>{clearTimers();try{speechSynthesis.cancel()}catch(e){}$('#over').hidden=true;go('map')};
 $('#sayBtn').onclick=()=>{if(R&&R.cur)speak(R.cur.q.say||R.cur.q.q)};
 
 /* ---------- number grid (the push-button toy) ---------- */
