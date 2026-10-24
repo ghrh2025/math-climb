@@ -223,6 +223,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .pg{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;text-align:left}
 .pgl{font-weight:700}.pgr{display:flex;gap:5px;flex-wrap:wrap}.pgr .dot{width:22px;height:22px}
 .pgk{grid-column:1/-1;color:var(--muted);font-weight:700;font-size:.9rem;display:flex;gap:6px;align-items:center}.pgk .dot{width:16px;height:16px}
+.cw{display:grid;justify-items:center;gap:3px}.cw small{font-size:.74rem;font-weight:700;color:var(--muted)}
+.ans .cw small{display:none}.ans .coin{transform:scale(1.35)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -424,7 +426,9 @@ function clockSVG(h,m){
   s+=`<line x1="100" y1="100" x2="${(100+74*Math.sin(ma)).toFixed(1)}" y2="${(100-74*Math.cos(ma)).toFixed(1)}" style="stroke:var(--pc)" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="100" r="7" style="fill:var(--ink)"/>`;
   return `<svg viewBox="0 0 200 200" width="190" height="190" role="img" aria-label="clock">${s}</svg>`;
 }
-function coinsVis(q,d,n,p){return `<div class="coins">${'<i class="coin q">25¢</i>'.repeat(q)}${'<i class="coin d">10¢</i>'.repeat(d)}${'<i class="coin n">5¢</i>'.repeat(n)}${'<i class="coin p">1¢</i>'.repeat(p)}</div>`}
+const COIN={quarter:['q',25],dime:['d',10],nickel:['n',5],penny:['p',1]};
+const coinOne=(name,face=true,label=true)=>`<span class="cw"><i class="coin ${COIN[name][0]}">${face?COIN[name][1]+'¢':''}</i>${label?`<small>${name}</small>`:''}</span>`;
+function coinsVis(q,d,n,p,face=true){return `<div class="coins">${[['quarter',q],['dime',d],['nickel',n],['penny',p]].map(([k,c])=>coinOne(k,face).repeat(c)).join('')}</div>`}
 function numlineSVG(v){
   const x=t=>20+t/100*320;let s=`<line x1="14" y1="50" x2="346" y2="50" style="stroke:var(--ink)" stroke-width="3"/>`;
   for(let t=0;t<=100;t+=5){const M=t%10===0;s+=`<line x1="${x(t)}" y1="${M?42:45}" x2="${x(t)}" y2="${M?58:55}" style="stroke:var(--ink)" stroke-width="${M?3:2}"/>`;if(M)s+=`<text x="${x(t)}" y="76" text-anchor="middle" style="fill:var(--muted);font:700 13px var(--body)">${t}</text>`}
@@ -642,6 +646,11 @@ const SK2=[
  {id:'transform',g:'8',n:'Translations',f:()=>{const x=r(1,4),y=r(1,4),dx=r(1,3),dy=r(1,3);return U(`Move the blue dot right ${dx}, up ${dy}`,`(${x+dx}, ${y+dy})`,[`(${x+dy}, ${y+dx})`,`(${x+dx}, ${y-dy>0?y-dy:y+dy+1})`,`(${y+dy}, ${x+dx})`,`(${x-dx>0?x-dx:x+dx+1}, ${y+dy})`],{vis:coordSVG([[x,y]]),say:`Move the dot right ${dx} and up ${dy}. Where does it land?`})}},
  {id:'angsum',g:'8',n:'Triangle angles',f:()=>{const a=r(30,80),b=r(30,180-a-20),c=180-a-b;return U(`A triangle has angles ${a}° and ${b}°. Third angle?`,c+'°',[c+10,180-a,360-a-b].map(x=>x+'°'),{say:`A triangle has angles of ${a} and ${b} degrees. What is the third angle?`})}},
 ];
+SK2.push(
+ {id:'coinid',g:'1',n:'Coin names',f:()=>{const k=pick(['penny','nickel','dime','quarter']);const opts=shuffle(['penny','nickel','dime','quarter']);const oh={},lab={};opts.forEach(o=>{oh[o]=coinOne(o,true,false);lab[o]='the '+o});return{q:`Find the ${k}`,a:k,opts,oh,lab,vis:`<span class="cic big" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></span>`,say:`Tap the ${k}!`}}},
+ {id:'coinval',g:'1',n:'Coin values',f:()=>{const k=pick(['penny','nickel','dime','quarter']);return U(`How much is a ${k}?`,COIN[k][1]+'¢',['1¢','5¢','10¢','25¢'],{vis:`<div class="coins">${coinOne(k,false)}</div>`})}},
+ {id:'coinwords',g:'2',n:'Dime + nickel + penny',f:()=>{const names=['quarter','dime','nickel','penny'],k=r(2,4),pick4=[...Array(k)].map(()=>pick(Math.random()<.3?names:names.slice(1))).sort((a,b)=>names.indexOf(a)-names.indexOf(b));const t=sum(pick4.map(x=>COIN[x][1]));const cnt=n=>pick4.filter(x=>x===n).length;return U(pick4.join(' + '),t+'¢',[t+1,t-1,t+5,t-5,t+10,k].filter(x=>x>0&&x!==t).map(x=>x+'¢'),{vis:coinsVis(cnt('quarter'),cnt('dime'),cnt('nickel'),cnt('penny'),false),say:`${pick4.join(' plus ')}. How much money?`})}},
+);
 const ORDER2=['count5','shapes','count10','next','more','pattern','add5','sub5','add10','sub10','count20','compare','doubles','make10','add20','sub20','missadd','shapes2','timehr','tens','plus10','word1','add2d','placeval','add2dr','sub2d','skip','evenodd','numline','coins','ruler','time5','coinsq','arrays','word2','x2510','x34','xall','div','missmul','frac','round10','round100','area','perim','elapsed','word3','x2d1d','x10','eqfrac','fraccmp','deccmp','divr','change','word4','dec','decx','fracadd','ooo','x2d2d','vol','pct','neg','ratio','unitrate','expo','mean','eq1'];
 
 /* ---------- the ladder: teaching order, K to 8th ---------- */
@@ -649,8 +658,8 @@ const GR={K:0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8};
 const BYID={};SK0.concat(SK1,SK2).forEach(s=>BYID[s.id]=s);
 const ORDER=[
  'count5','shapes','count10','next','k3d','more','pattern','longer','add5','sub5','teen','add10','sub10',
- 'count20','compare','tally','doubles','make10','add20','sub20','add3','missadd','addtens','shapes2','halves','timehr','tens','plus10','word1',
- 'add2d','placeval','expanded','add2dr','sub2d','compare3','more100','skip','evenodd','numline','coins','ruler','time5','add3d','sub3d','bargraph','coinsq','arrays','word2',
+ 'count20','compare','tally','doubles','make10','add20','sub20','add3','missadd','addtens','shapes2','halves','timehr','coinid','coinval','tens','plus10','word1',
+ 'add2d','placeval','expanded','add2dr','sub2d','compare3','more100','skip','evenodd','numline','coins','coinwords','ruler','time5','add3d','sub3d','bargraph','coinsq','arrays','word2',
  'x2510','x34','xall','div','missmul','mult10','frac','fracline','round10','round100','sub3dr','rule','area','perim','scalegraph','elapsed','word3',
  'x2d1d','x10','factor','prime','add4d','div4','eqfrac','fraccmp','mixed','dec100','deccmp','divr','roundbig','angle','convert','change','word4',
  'dec','decsub','decround','decx','fracadd','fracsub','fracmul','fracdivunit','pow10','ooo','x2d2d','longdiv','coord','vol',
@@ -668,7 +677,7 @@ const MODULES=[
  {id:'addsub',n:'Add & Subtract',gl:'+ −',gr:'K–4',ids:['add5','sub5','add10','sub10','doubles','make10','add20','sub20','add3','missadd','addtens','add2d','add2dr','sub2d','add3d','sub3d','sub3dr','add4d']},
  {id:'shapes',n:'Shapes & Patterns',gl:'△',gr:'K–1',ids:['shapes','k3d','pattern','shapes2','halves']},
  {id:'clock',n:'Clock Tower',gl:'3:00',gr:'1–3',ids:['timehr','time5','elapsed']},
- {id:'money',n:'Money Jar',gl:'25¢',gr:'2–4',ids:['coins','coinsq','change']},
+ {id:'money',n:'Money Jar',gl:'25¢',gr:'1–4',ids:['coinid','coinval','coins','coinwords','coinsq','change']},
  {id:'data',n:'Data & Graphs',gl:'▮▮',gr:'1–7',ids:['tally','bargraph','scalegraph','mean','median','prob']},
  {id:'times',n:'Times & Divide',gl:'×',gr:'2–5',ids:['arrays','x2510','x34','xall','div','missmul','mult10','x2d1d','x10','div4','divr','x2d2d','longdiv']},
  {id:'factors',n:'Factors & Primes',gl:'7',gr:'4–6',ids:['factor','prime','gcf','lcm']},
@@ -702,6 +711,10 @@ DB.players.forEach(p=>{if(p.v>=2)return;let fo=null;for(const id of OLD_IDS){con
 /* v3 added 74 more skills (K-8). Same rule: new skills below the player's level count as done. */
 DB.players.forEach(p=>{if(p.v>=3)return;let fo=null;for(const id of ORDER2){const s=p.sk[id];if(!s||!s.m){fo=id;break}}
   const fr=fo?GR[BYID[fo].g]:9;SK2.forEach(s=>{if(!p.sk[s.id]&&GR[s.g]<fr)st(p,s.id).m=true});p.v=3});
+/* v4 added coin names/values. Same rule. */
+const NEW4=['coinid','coinval','coinwords'];
+DB.players.forEach(p=>{if(p.v>=4)return;let fo=null;for(const id of ORDER){if(NEW4.includes(id))continue;const s=p.sk[id];if(!s||!s.m){fo=id;break}}
+  const fr=fo?GR[BYID[fo].g]:9;NEW4.forEach(id=>{if(!p.sk[id]&&GR[BYID[id].g]<fr)st(p,id).m=true});p.v=4});
 save();
 
 /* ---------- adaptive engine ----------
@@ -794,7 +807,7 @@ function renderAdd(){
 }
 $('#addForm').addEventListener('submit',e=>{
   e.preventDefault();const name=$('#pname').value.trim();if(!name)return;
-  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{},v:3};
+  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{},v:4};
   const start=SK.findIndex(s=>s.g===addGrade);for(let i=0;i<start;i++)st(p,SK[i].id).m=true;
   DB.players.push(p);save();P=p;go('map');
 });
