@@ -220,6 +220,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .vrow{display:flex;gap:10px;flex-wrap:wrap}
 .vrow select{flex:1 1 220px;min-width:0;font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
 .vrow .btn{font-size:1rem;padding:10px 18px}
+.pg{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;text-align:left}
+.pgl{font-weight:700}.pgr{display:flex;gap:5px;flex-wrap:wrap}.pgr .dot{width:22px;height:22px}
+.pgk{grid-column:1/-1;color:var(--muted);font-weight:700;font-size:.9rem;display:flex;gap:6px;align-items:center}.pgk .dot{width:16px;height:16px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -387,7 +390,7 @@ const SK0=[
  {id:'ratio',g:'6',n:'Ratios',f:()=>{let a=r(1,5),b=r(2,7);while(a===b)b=r(2,7);const k=r(2,5);return N(`${a} : ${b} = ${a*k} : ?`,b*k,{spread:b,say:`${a} to ${b} is the same as ${a*k} to what?`})}},
  {id:'eq1',g:'6',n:'Solve for x',f:()=>{const t=pick(['+','-','x']);if(t==='+'){const a=r(2,15),x=r(1,15);return N(`x + ${a} = ${x+a}`,x,{say:`x plus ${a} equals ${x+a}. What is x?`})}if(t==='-'){const a=r(2,12),x=r(a+1,25);return N(`x − ${a} = ${x-a}`,x,{say:`x minus ${a} equals ${x-a}. What is x?`})}const a=r(2,9),x=r(2,9);return N(`${a}x = ${a*x}`,x,{say:`${a} times x equals ${a*x}. What is x?`})}},
 ];
-const GRADES=[['K','K'],['1','1st'],['2','2nd'],['3','3rd'],['4','4th'],['5','5th'],['6','6th']];
+const GRADES=[['K','K'],['1','1st'],['2','2nd'],['3','3rd'],['4','4th'],['5','5th'],['6','6th'],['7','7th'],['8','8th']];
 const COLORS=['#2C7FD0','#E0507A','#21985E','#8757D2','#E07A22','#0F9AA0'];
 
 /* ---------- new visuals ---------- */
@@ -501,16 +504,159 @@ const SK1=[
  {id:'mean',g:'6',n:'Average',f:()=>{const m=r(4,20),d1=r(1,4),d2=r(1,4),v=shuffle([m-d1,m+d2,m+d1-d2]);return U(`Average of ${v.join(', ')}`,m,[3*m,m+1,m-1,Math.max(...v)],{say:`What is the average of ${v.join(', ')}?`})}},
 ];
 
-/* ---------- the ladder: 68 skills in teaching order, K to 6th ---------- */
-const GR={K:0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6};
-const BYID={};SK0.concat(SK1).forEach(s=>BYID[s.id]=s);
-const ORDER=['count5','shapes','count10','next','more','pattern','add5','sub5','add10','sub10',
- 'count20','compare','doubles','make10','add20','sub20','missadd','shapes2','timehr','tens','plus10','word1',
- 'add2d','placeval','add2dr','sub2d','skip','evenodd','numline','coins','ruler','time5','coinsq','arrays','word2',
- 'x2510','x34','xall','div','missmul','frac','round10','round100','area','perim','elapsed','word3',
- 'x2d1d','x10','eqfrac','fraccmp','deccmp','divr','change','word4',
- 'dec','decx','fracadd','ooo','x2d2d','vol',
- 'pct','neg','ratio','unitrate','expo','mean','eq1'];
+/* ---------- more visuals (v3) ---------- */
+const gcd=(a,b)=>{a=Math.abs(a);b=Math.abs(b);while(b)[a,b]=[b,a%b];return a};
+const fracS=(n,d)=>{const g=gcd(n,d);n/=g;d/=g;if(d<0){n=-n;d=-d}return d===1?fm(n):`${fm(n)}/${d}`};
+const SUPD='⁰¹²³⁴⁵⁶⁷⁸⁹';const sup=n=>String(n).split('').map(c=>c==='-'?'⁻':SUPD[+c]).join('');
+const dec2=x=>(Math.round(x*100)/100).toFixed(2);
+const money=x=>'$'+(Number.isInteger(x)?x:x.toFixed(2));
+const trim=s=>s.includes('.')?s.replace(/0+$/,'').replace(/\.$/,''):s;
+const SV=(vb,w,inner,label)=>`<svg viewBox="${vb}" width="${w}" style="max-width:100%;height:auto" role="img" aria-label="${label}">${inner}</svg>`;
+const TX=(x,y,t,a='middle',sz=14,col='var(--ink)')=>`<text x="${x}" y="${y}" text-anchor="${a}" style="fill:${col};font:700 ${sz}px var(--body)">${t}</text>`;
+function findPic(all,draw,targets=all,verb='Find'){
+  const k=pick(targets);const opts=shuffle([k,...shuffle(all.filter(x=>x!==k)).slice(0,3)]);const cols=shuffle([1,2,3,4]);
+  const oh={},lab={};opts.forEach((o,i)=>{oh[o]=draw(o,C[cols[i]],84);lab[o]='the '+o});
+  return{q:`${verb} the ${k}`,a:k,opts,oh,lab,vis:`<span class="cic big" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg></span>`,say:`Tap the ${k}!`};
+}
+function solidSVG(k,col,sz){
+  const S=`style="fill:${col};stroke:var(--ink)" stroke-width="3" stroke-linejoin="round"`,L=`style="fill:none;stroke:var(--ink)" stroke-width="2"`;let e;
+  if(k==='sphere')e=`<circle cx="50" cy="50" r="38" ${S}/><ellipse cx="50" cy="50" rx="38" ry="12" ${L} stroke-dasharray="4 4"/><circle cx="38" cy="36" r="7" style="fill:#fff;opacity:.5"/>`;
+  else if(k==='cube')e=`<polygon points="18,34 64,34 64,82 18,82" ${S}/><polygon points="18,34 36,18 82,18 64,34" ${S}/><polygon points="64,34 82,18 82,66 64,82" ${S}/>`;
+  else if(k==='cone')e=`<path d="M50 10 L84 78 A34 11 0 0 1 16 78 Z" ${S}/><ellipse cx="50" cy="78" rx="34" ry="11" ${L}/>`;
+  else if(k==='cylinder')e=`<path d="M18 22 V78 A32 10 0 0 0 82 78 V22" ${S}/><ellipse cx="50" cy="22" rx="32" ry="10" ${S}/>`;
+  else e=`<polygon points="50,10 16,74 50,88" ${S}/><polygon points="50,10 50,88 86,72" ${S}/>`;
+  return `<svg class="shp" viewBox="0 0 100 100" width="${sz}" height="${sz}" aria-hidden="true">${e}</svg>`;
+}
+function barPic(len,col){return `<svg class="shp" viewBox="0 0 210 30" width="190" height="27" aria-hidden="true"><rect x="2" y="5" width="${len*22}" height="20" rx="10" style="fill:${col};stroke:var(--ink)" stroke-width="2"/></svg>`}
+function partSVG(kind,n,eq,col,sz){
+  const S=`style="fill:${col};stroke:var(--ink)" stroke-width="3"`;let e='';
+  if(kind==='rect'){let ws=eq?Array(n).fill(1/n):(()=>{let a=[...Array(n)].map((_,i)=>i===0?2.2:1);const t=sum(a);return a.map(x=>x/t)})();let x=10;
+    ws.forEach(w=>{e+=`<rect x="${x.toFixed(1)}" y="22" width="${(w*80).toFixed(1)}" height="56" ${S}/>`;x+=w*80})}
+  else{let a0=-90;const ws=eq?Array(n).fill(360/n):(n===2?[230,130]:[140,80,80,60]);ws.forEach(w=>{const a1=a0+w,R=40,p=(a)=>`${(50+R*Math.cos(a*Math.PI/180)).toFixed(1)},${(50+R*Math.sin(a*Math.PI/180)).toFixed(1)}`;e+=`<path d="M50,50 L${p(a0)} A40,40 0 ${w>180?1:0} 1 ${p(a1)} Z" ${S}/>`;a0=a1})}
+  return `<svg class="shp" viewBox="0 0 100 100" width="${sz}" height="${sz}" aria-hidden="true">${e}</svg>`;
+}
+function tallySVG(n){let s='';const g=Math.ceil(n/5);for(let k=0;k<g;k++){const c=Math.min(5,n-5*k),x0=8+k*52;for(let i=0;i<Math.min(c,4);i++)s+=`<line x1="${x0+i*10}" y1="10" x2="${x0+i*10}" y2="62" style="stroke:var(--ink)" stroke-width="4" stroke-linecap="round"/>`;if(c===5)s+=`<line x1="${x0-6}" y1="54" x2="${x0+36}" y2="18" style="stroke:var(--c1)" stroke-width="4" stroke-linecap="round"/>`}return SV(`0 0 ${g*52+8} 72`,g*52+8,s,'tally marks')}
+function barSVG(data,max=10){
+  const W=320,H=230,x0=34,y0=190,bw=46,gap=(W-x0-10-data.length*bw)/data.length,sc=170/max;let s='';
+  for(let v=0;v<=max;v+=2){const y=y0-v*sc;s+=`<line x1="${x0}" y1="${y}" x2="${W-6}" y2="${y}" style="stroke:var(--line)" stroke-width="1.5"/>`+TX(x0-8,y+5,v,'end',12,'var(--muted)')}
+  data.forEach(([l,v],i)=>{const x=x0+gap/2+i*(bw+gap);s+=`<rect x="${x}" y="${y0-v*sc}" width="${bw}" height="${v*sc}" rx="4" style="fill:${C[i+1]}"/>`+TX(x+bw/2,y0+20,l,'middle',13)});
+  s+=`<line x1="${x0}" y1="${y0}" x2="${W-6}" y2="${y0}" style="stroke:var(--ink)" stroke-width="2"/>`;
+  return SV(`0 0 ${W} ${H}`,W,s,'bar graph');
+}
+function picGraph(data,scale){return `<div class="pg">${data.map(([l,v],i)=>`<span class="pgl">${l}</span><span class="pgr">${('<i class="dot" style="background:'+C[i+1]+'"></i>').repeat(v/scale)}</span>`).join('')}<span class="pgk">Each <i class="dot"></i> = ${scale}</span></div>`}
+function fraclineSVG(n,d){const x=t=>20+t*320;let s=`<line x1="20" y1="50" x2="340" y2="50" style="stroke:var(--ink)" stroke-width="3"/>`;for(let i=0;i<=d;i++)s+=`<line x1="${x(i/d)}" y1="${i%d?43:38}" x2="${x(i/d)}" y2="${i%d?57:62}" style="stroke:var(--ink)" stroke-width="${i%d?2:3}"/>`;s+=TX(20,82,0)+TX(340,82,1)+`<polygon points="${x(n/d)-9},12 ${x(n/d)+9},12 ${x(n/d)},32" style="fill:var(--pc)"/>`;return SV('0 0 360 90',360,s,'fraction number line')}
+function angleSVG(deg){const vx=130,vy=140,R=110,a=deg*Math.PI/180,ex=vx+R*Math.cos(a),ey=vy-R*Math.sin(a);let s=`<line x1="${vx}" y1="${vy}" x2="${vx+R}" y2="${vy}" style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"/><line x1="${vx}" y1="${vy}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"/>`;
+  if(deg===90)s+=`<path d="M${vx+22} ${vy} V${vy-22} H${vx}" style="fill:none;stroke:var(--pc)" stroke-width="3"/>`;else{const r=30;s+=`<path d="M${vx+r} ${vy} A${r} ${r} 0 0 0 ${(vx+r*Math.cos(a)).toFixed(1)} ${(vy-r*Math.sin(a)).toFixed(1)}" style="fill:none;stroke:var(--pc)" stroke-width="3"/>`}
+  return SV('0 0 260 160',240,s,'angle')}
+function coordSVG(pts){const u=26,o=24,N=8;let s='';for(let i=0;i<=N;i++){s+=`<line x1="${o+i*u}" y1="${o}" x2="${o+i*u}" y2="${o+N*u}" style="stroke:var(--line)" stroke-width="1.5"/><line x1="${o}" y1="${o+i*u}" x2="${o+N*u}" y2="${o+i*u}" style="stroke:var(--line)" stroke-width="1.5"/>`+TX(o+i*u,o+N*u+18,i,'middle',12,'var(--muted)')+(i?TX(o-8,o+(N-i)*u+4,i,'end',12,'var(--muted)'):'')}
+  s+=`<line x1="${o}" y1="${o+N*u}" x2="${o+N*u}" y2="${o+N*u}" style="stroke:var(--ink)" stroke-width="2.5"/><line x1="${o}" y1="${o}" x2="${o}" y2="${o+N*u}" style="stroke:var(--ink)" stroke-width="2.5"/>`;
+  pts.forEach(([x,y],i)=>s+=`<circle cx="${o+x*u}" cy="${o+(N-y)*u}" r="7" style="fill:${i?'var(--c1)':'var(--pc)'};stroke:var(--card)" stroke-width="2"/>`);
+  return SV(`0 0 ${o*2+N*u} ${o*2+N*u}`,o*2+N*u,s,'coordinate grid')}
+function triSVG(b,h){const sc=Math.min(220/b,120/h),W=b*sc,H=h*sc,X=20,Y=14,ax=X+W*.35;const s=`<polygon points="${X},${Y+H} ${X+W},${Y+H} ${ax},${Y}" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="3" stroke-linejoin="round"/><line x1="${ax}" y1="${Y}" x2="${ax}" y2="${Y+H}" style="stroke:var(--ink)" stroke-width="2" stroke-dasharray="5 4"/>`+TX(X+W/2,Y+H+20,b+' cm')+TX(ax+8,Y+H/2+5,h+' cm','start');return SV(`0 0 ${W+60} ${H+40}`,W+60,s,'triangle')}
+function circSVG(r,diam){const s=`<circle cx="90" cy="80" r="66" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="3"/><circle cx="90" cy="80" r="4" style="fill:var(--ink)"/>`+(diam?`<line x1="24" y1="80" x2="156" y2="80" style="stroke:var(--ink)" stroke-width="3"/>`+TX(90,72,'d = '+2*r):`<line x1="90" y1="80" x2="156" y2="80" style="stroke:var(--ink)" stroke-width="3"/>`+TX(123,72,'r = '+r));return SV('0 0 180 160',170,s,'circle')}
+function rtSVG(a,b,c){const s=`<polygon points="30,150 230,150 30,30" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="3" stroke-linejoin="round"/><path d="M30 132 H48 V150" style="fill:none;stroke:var(--ink)" stroke-width="2"/>`+TX(130,172,a)+TX(20,95,b,'end')+TX(142,84,c,'start');return SV('0 0 260 180',240,s,'right triangle')}
+function marbles(cs){return `<div class="dots" style="max-width:300px">${shuffle(cs.flatMap(([n,ci])=>Array(n).fill(ci))).map(ci=>`<i class="dot" style="background:${C[ci]}"></i>`).join('')}</div>`}
+const FRUIT=['Apples','Pears','Plums','Grapes'],PETS=['Cats','Dogs','Fish','Birds'];
+
+/* ---------- v3 skills: deeper grades K-6 plus 7th and 8th ---------- */
+const SK2=[
+ /* K */
+ {id:'k3d',g:'K',n:'Solid shapes',f:()=>findPic(['sphere','cube','cone','cylinder','pyramid'],solidSVG)},
+ {id:'teen',g:'K',n:'Teen numbers',f:()=>{const n=r(1,9);return N(`10 + ${n}`,10+n,{vis:frames(10+n),say:`Ten plus ${n}. How many?`})}},
+ {id:'longer',g:'K',n:'Longer and shorter',f:()=>{const L=shuffle([2,4,6,8].map(x=>x+r(0,1))).slice(0,3),w=pick(['longest','shortest']),a=String(w==='longest'?Math.max(...L):Math.min(...L));const cols=shuffle([1,2,3,4]);const oh={},lab={};L.forEach((x,i)=>{oh[x]=barPic(x,C[cols[i]]);lab[x]=x===+a?'the '+w+' one':'that one'});return{q:`Find the ${w}`,a,opts:L.map(String),oh,lab,vis:'',say:`Tap the ${w} one!`}}},
+ /* 1st */
+ {id:'tally',g:'1',n:'Tally marks',f:()=>{const n=r(3,20);return N('How many?',n,{vis:tallySVG(n),say:'Count the tally marks. How many?'})}},
+ {id:'add3',g:'1',n:'Add three numbers',f:()=>{let a,b,c;do{a=r(1,9);b=r(1,9);c=r(1,9)}while(a+b+c>20);return N(`${a} + ${b} + ${c}`,a+b+c)}},
+ {id:'addtens',g:'1',n:'Add and subtract tens',f:()=>{const a=10*r(1,8),b=10*r(1,9-a/10);return Math.random()<.6?N(`${a} + ${b}`,a+b,{spread:10}):N(`${a+b} − ${b}`,a,{spread:10})}},
+ {id:'halves',g:'1',n:'Halves and fourths',f:()=>{const n=pick([2,4]),kind=pick(['rect','circle']),other=n===2?4:2;const opts=['good','bad1','bad2','other'];const cols=shuffle([1,2,3,4]);const oh={good:partSVG(kind,n,true,C[cols[0]],84),bad1:partSVG(kind,n,false,C[cols[1]],84),bad2:partSVG(kind==='rect'?'circle':'rect',n,false,C[cols[2]],84),other:partSVG(kind,other,true,C[cols[3]],84)};const w=n===2?'halves':'fourths';return{q:`Find ${w}`,a:'good',opts:shuffle(opts),oh,lab:{good:`cut in ${n} equal parts`,bad1:'not equal parts',bad2:'not equal parts',other:`cut in ${other} parts`},vis:'',say:`Tap the shape cut into ${n} equal parts. That is ${w}.`}}},
+ /* 2nd */
+ {id:'add3d',g:'2',n:'Add 3-digit numbers',f:()=>{const a=r(100,599),b=r(100,399);return N(`${a} + ${b}`,a+b,{spread:100})}},
+ {id:'sub3d',g:'2',n:'Subtract 3-digit numbers',f:()=>{const a=r(300,999),b=r(100,a-50);return N(`${a} − ${b}`,a-b,{spread:100})}},
+ {id:'bargraph',g:'2',n:'Bar graphs',f:()=>{const lab=shuffle((Math.random()<.5?FRUIT:PETS).slice()).slice(0,3),v=lab.map(()=>r(1,10));const d=lab.map((l,i)=>[l,v[i]]),k=r(0,2);const vis=barSVG(d);if(k===0){const i=r(0,2);return N(`How many ${lab[i].toLowerCase()}?`,v[i],{vis})}if(k===1){let i=v.indexOf(Math.max(...v)),j=v.indexOf(Math.min(...v));if(i===j)j=(i+1)%3;return N(`How many more ${lab[i].toLowerCase()} than ${lab[j].toLowerCase()}?`,v[i]-v[j],{vis})}return N(`${lab[0]} and ${lab[1].toLowerCase()} together?`,v[0]+v[1],{vis,say:`How many ${lab[0]} and ${lab[1]} together?`})}},
+ {id:'expanded',g:'2',n:'Expanded form',f:()=>{const h=r(1,9),t=r(0,9),o=r(1,9);return N(`${h*100} + ${t*10} + ${o}`,h*100+t*10+o,{spread:10})}},
+ {id:'compare3',g:'2',n:'Compare 3-digit numbers',f:()=>{const a=r(100,999);const b=Math.random()<.15?a:Math.random()<.5?a+pick([-1,1])*pick([1,10,100]):r(100,999);const B=Math.min(999,Math.max(100,b));return cmpQ(`${a}  ?  ${B}`,a,B,`Is ${a} less than, equal to, or greater than ${B}?`)}},
+ {id:'more100',g:'2',n:'10 or 100 more and less',f:()=>{const n=r(110,889),d=pick([10,100]),up=Math.random()<.5;return N(`${n} ${up?'+':'−'} ${d}`,up?n+d:n-d,{spread:d})}},
+ /* 3rd */
+ {id:'mult10',g:'3',n:'Times tens',f:()=>{const a=r(2,9),b=10*r(1,9);return N(`${a} × ${b}`,a*b,{spread:10})}},
+ {id:'sub3dr',g:'3',n:'Subtract across zeros',f:()=>{const a=100*r(2,9)+pick([0,0,r(1,9)]),b=r(101,a-20);return N(`${a} − ${b}`,a-b,{spread:10})}},
+ {id:'scalegraph',g:'3',n:'Picture graphs',f:()=>{const sc=pick([2,5]),lab=shuffle(PETS.slice()).slice(0,3),v=lab.map(()=>sc*r(1,6));const vis=picGraph(lab.map((l,i)=>[l,v[i]]),sc);if(Math.random()<.5){const i=r(0,2);return N(`How many ${lab[i].toLowerCase()}?`,v[i],{spread:sc,vis})}return N(`${lab[0]} and ${lab[2].toLowerCase()} together?`,v[0]+v[2],{spread:sc,vis,say:`How many ${lab[0]} and ${lab[2]} together?`})}},
+ {id:'rule',g:'3',n:'Number pattern rules',f:()=>{if(Math.random()<.7){const s=r(1,20),d=r(2,9),q=[0,1,2,3].map(i=>s+i*d);return U(`${q.join(', ')}`,`Add ${d}`,[`Add ${d+1}`,`Add ${d-1}`,`Subtract ${d}`,`Times 2`],{say:`${q.join(', ')}. What is the rule?`})}const m=pick([2,3]),s=r(1,4),q=[0,1,2,3].map(i=>s*m**i);return U(`${q.join(', ')}`,`Times ${m}`,[`Add ${q[1]-q[0]}`,`Times ${m+1}`,`Add ${m}`],{say:`${q.join(', ')}. What is the rule?`})}},
+ {id:'fracline',g:'3',n:'Fractions on a number line',f:()=>{const d=pick([2,3,4,6,8]),n=r(1,d-1);return U('What fraction is the arrow on?',`${n}/${d}`,[`${d-n}/${d}`,`${n}/${d+1}`,`${n+1>=d?n-1:n+1}/${d}`,`1/${n}`].filter(x=>!x.startsWith('0/')),{vis:fraclineSVG(n,d)})}},
+ /* 4th */
+ {id:'factor',g:'4',n:'Factors',f:()=>{const n=pick([12,16,18,20,24,28,30,36,40,42,45,48]),fs=[...Array(11)].map((_,i)=>i+2).filter(x=>n%x===0&&x<n),nf=[...Array(11)].map((_,i)=>i+2).filter(x=>n%x);return U(`Which is a factor of ${n}?`,pick(fs),nf)}},
+ {id:'prime',g:'4',n:'Prime numbers',f:()=>{const P=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47],Q=[4,6,8,9,10,12,14,15,16,18,21,22,25,27,33,35,39,49,51];return U('Which number is prime?',pick(P),Q)}},
+ {id:'add4d',g:'4',n:'Add and subtract big numbers',f:()=>{const a=r(1200,8999),b=r(1000,Math.min(8999,a-100)),up=Math.random()<.5,v=up?a+b:a-b;return U(`${F(a)} ${up?'+':'−'} ${F(b)}`,F(v),[v+10,v-10,v+100,v-100,v+1000,v-1000].filter(x=>x>0).map(F))}},
+ {id:'div4',g:'4',n:'Divide 3-digit numbers',f:()=>{const d=r(2,9),q=r(12,Math.floor(999/d));return N(`${d*q} ÷ ${d}`,q,{spread:10})}},
+ {id:'mixed',g:'4',n:'Mixed numbers',f:()=>{const d=r(2,8),n=r(1,d-1),w=r(1,4);return U(`${w} ${n}/${d} = ?`,`${w*d+n}/${d}`,[`${w+n}/${d}`,`${w*n+d}/${d}`,`${w*d}/${d}`,`${w*d+n}/${d+1}`],{say:`${w} and ${n} over ${d} is how many ${d}ths?`})}},
+ {id:'dec100',g:'4',n:'Tenths and hundredths',f:()=>{const x=r(1,9);return Math.random()<.5?U(`0.${x} = ?/100`,x*10,[x,x*10+10,x*10-10,x*100].filter(v=>v>0),{say:`zero point ${x} equals how many hundredths?`}):U(`${x*10}/100 = ?`,`0.${x}`,[`0.0${x}`,`${x}.0`,`${x}/10`,`${x*10}.0`])}},
+ {id:'angle',g:'4',n:'Kinds of angles',f:()=>{const k=pick(['Acute','Right','Obtuse','Straight']),deg={Acute:r(25,70),Right:90,Obtuse:r(110,160),Straight:180}[k];return{q:'What kind of angle?',a:k,opts:['Acute','Right','Obtuse','Straight'],vis:angleSVG(deg),say:'What kind of angle is this?'}}},
+ {id:'convert',g:'4',n:'Convert units',f:()=>{const [u1,u2,m]=pick([['feet','inches',12],['yards','feet',3],['hours','minutes',60],['minutes','seconds',60],['meters','centimeters',100],['kilograms','grams',1000],['pounds','ounces',16],['days','hours',24]]),n=r(2,9),v=n*m;return U(`${n} ${u1} = ? ${u2}`,F(v),[v+m,v-m,n*10,v+n].filter(x=>x>0&&x!==v).map(F))}},
+ {id:'roundbig',g:'4',n:'Round to 1,000',f:()=>{const n=r(1001,9899),a=Math.round(n/1000)*1000;return U(`Round ${F(n)} to the nearest 1,000`,F(a),[a-1000,a+1000,Math.round(n/100)*100].filter(x=>x>0).map(F),{say:`Round ${n} to the nearest thousand`})}},
+ /* 5th */
+ {id:'decsub',g:'5',n:'Subtract decimals',f:()=>{const a=r(300,999),b=r(100,a-50),v=a-b;return U(`${dec2(a/100)} − ${dec2(b/100)}`,dec2(v/100),[v+1,v-1,v+10,v-10,v+100].filter(x=>x>0).map(x=>dec2(x/100)))}},
+ {id:'fracsub',g:'5',n:'Unlike denominators',f:()=>{const d=pick([2,3,4,5]),k=pick([2,3]),D=d*k,a=r(1,d-1),b=r(1,D-1),add=Math.random()<.5||a*k<=b,v=add?a*k+b:a*k-b;return U(`${a}/${d} ${add?'+':'−'} ${b}/${D} = ?/${D}`,v,[add?a+b:Math.abs(a-b),v+1,v-1,v+k].filter(x=>x>0),{say:`${a} over ${d} ${add?'plus':'minus'} ${b} over ${D} equals what over ${D}?`})}},
+ {id:'fracmul',g:'5',n:'Fraction times whole',f:()=>{const d=r(3,8),n=r(1,d-1),w=r(2,6);return U(`${n}/${d} × ${w}`,`${n*w}/${d}`,[`${n*w}/${d*w}`,`${n}/${d*w}`,`${n+w}/${d}`,`${n*w}/${d+w}`])}},
+ {id:'pow10',g:'5',n:'Powers of 10',f:()=>{const e=r(2,5);if(Math.random()<.5)return U(`10${sup(e)}`,F(10**e),[10**(e+1),10**(e-1),10*e,e*100].map(F),{say:`10 to the power of ${e}`});const a=r(2,9);return U(`${a} × 10${sup(e)}`,F(a*10**e),[a*10**(e+1),a*10**(e-1),a*10*e].map(F),{say:`${a} times 10 to the power of ${e}`})}},
+ {id:'coord',g:'5',n:'Coordinate grid',f:()=>{let x=r(1,7),y=r(1,7);if(x===y)y=y%7+1;return U('Where is the dot?',`(${x}, ${y})`,[`(${y}, ${x})`,`(${x+1}, ${y})`,`(${x}, ${y-1||y+1})`],{vis:coordSVG([[x,y]]),say:'What are the coordinates of the dot?'})}},
+ {id:'longdiv',g:'5',n:'Long division',f:()=>{const d=r(11,35),q=r(12,99);return U(`${F(d*q)} ÷ ${d}`,q,[q+1,q-1,q+10,q-10])}},
+ {id:'decround',g:'5',n:'Round decimals',f:()=>{const v=r(101,999)/100,t=pick(['tenth','whole number']);if(t==='tenth'){const a=(Math.round(v*10)/10).toFixed(1);return U(`Round ${v.toFixed(2)} to the nearest tenth`,a,[(+a+.1).toFixed(1),(+a-.1).toFixed(1),String(Math.round(v)),v.toFixed(2).slice(0,3)])}const a=Math.round(v);return U(`Round ${v.toFixed(2)} to the nearest whole number`,a,[a+1,a-1,(Math.round(v*10)/10).toFixed(1)].filter(x=>+x>=0))}},
+ {id:'fracdivunit',g:'5',n:'Divide by unit fractions',f:()=>{const d=r(2,8),w=r(2,6);return Math.random()<.5?U(`${w} ÷ 1/${d}`,w*d,[`${w}/${d}`,w+d,w*d+d],{say:`${w} divided by one ${d}th`}):U(`1/${d} ÷ ${w}`,`1/${d*w}`,[`${w}/${d}`,`1/${d+w}`,`${d*w}`],{say:`one ${d}th divided by ${w}`})}},
+ /* 6th */
+ {id:'gcf',g:'6',n:'Greatest common factor',f:()=>{const g=r(2,9);let m,n;do{m=r(2,7);n=r(2,7)}while(m===n||gcd(m,n)!==1);const a=g*m,b=g*n,lower=[...Array(g)].map((_,i)=>i).filter(x=>x>1&&g%x===0);return U(`GCF of ${a} and ${b}`,g,[...lower,a*b/g,Math.min(a,b),1,g*2].filter(x=>a%x||b%x||x<g),{say:`What is the greatest common factor of ${a} and ${b}?`})}},
+ {id:'lcm',g:'6',n:'Least common multiple',f:()=>{let a,b;do{a=r(2,12);b=r(2,12)}while(a===b||Math.max(a,b)%Math.min(a,b)===0);const l=a*b/gcd(a,b);return U(`LCM of ${a} and ${b}`,l,[a*b,l*2,Math.max(a,b),l+Math.min(a,b)].filter(x=>x!==l),{say:`What is the least common multiple of ${a} and ${b}?`})}},
+ {id:'fracdiv',g:'6',n:'Divide fractions',f:()=>{const b=r(2,6),a=r(1,b-1),d=r(2,6),c=r(1,d-1);const ans=fracS(a*d,b*c);return U(`${a}/${b} ÷ ${c}/${d}`,ans,[fracS(a*c,b*d),fracS(b*c,a*d),fracS(a+d,b+c),fracS(a*d+1,b*c)],{say:`${a} over ${b} divided by ${c} over ${d}`})}},
+ {id:'absval',g:'6',n:'Absolute value',f:()=>{const a=r(-15,-1),b=r(-9,9);return Math.random()<.5?U(`|${fm(a)}|`,-a,[a,0,-a+1].map(fm),{say:`the absolute value of negative ${-a}`}):U(`|${fm(a)}| + |${fm(b)}|`,-a+Math.abs(b),[a+b,-a+b,Math.abs(a+b)].map(fm),{say:`absolute value of ${fm(a)} plus absolute value of ${fm(b)}`})}},
+ {id:'evalexp',g:'6',n:'Evaluate expressions',f:()=>{const a=r(2,9),b=r(1,12),x=r(2,9);return U(`${a}x + ${b} when x = ${x}`,a*x+b,[a+x+b,Number(`${a}${x}`)+b,a*(x+b),a*x],{say:`${a} x plus ${b}, when x equals ${x}`})}},
+ {id:'areatri',g:'6',n:'Area of triangles',f:()=>{const b=2*r(2,8),h=r(2,9);return U('Area = ? sq cm',b*h/2,[b*h,b+h,b*h/2+b,(b+h)*2],{vis:triSVG(b,h),say:'What is the area of the triangle? Base times height, divided by 2.'})}},
+ {id:'median',g:'6',n:'Median',f:()=>{const v=[...Array(5)].map(()=>r(1,20)),s=v.slice().sort((x,y)=>x-y),m=s[2],mean=Math.round(sum(v)/5);return U(`Median of ${v.join(', ')}`,m,[v[2],mean,s[4]-s[0],s[1],s[3]].filter(x=>x!==m),{say:`What is the median of ${v.join(', ')}?`})}},
+ {id:'decdiv',g:'6',n:'Divide decimals',f:()=>{const w=r(2,9),q=r(11,49),t=w*q;return U(`${(t/10).toFixed(1)} ÷ ${w}`,(q/10).toFixed(1),[(q/100).toFixed(2),String(q),((q+1)/10).toFixed(1),((q-1)/10).toFixed(1)])}},
+ /* 7th */
+ {id:'intadd',g:'7',n:'Add integers',f:()=>{let a=r(-15,15)||-4,b=r(-15,15)||5;if(a>0&&b>0)a=-a;const v=a+b;return U(`${fm(a)} + ${b<0?'('+fm(b)+')':b}`,fm(v),[-v,a-b,v+1,v-1].map(fm).filter(x=>x!==fm(v)),{say:`${fm(a)} plus ${fm(b)}`})}},
+ {id:'intsub',g:'7',n:'Subtract integers',f:()=>{const a=r(-12,12)||3,b=r(-12,-1),v=a-b;return U(`${fm(a)} − (${fm(b)})`,fm(v),[a+b,-v,v+1,v-1].map(fm).filter(x=>x!==fm(v)),{say:`${fm(a)} minus ${fm(b)}`})}},
+ {id:'intmul',g:'7',n:'Multiply integers',f:()=>{const a=r(2,9)*pick([-1,1]),b=r(2,9)*(a>0?-1:pick([-1,1])),v=a*b;return U(`${fm(a)} × ${b<0?'('+fm(b)+')':b}`,fm(v),[-v,v+a,a+b].map(fm).filter(x=>x!==fm(v)),{say:`${fm(a)} times ${fm(b)}`})}},
+ {id:'intdiv',g:'7',n:'Divide integers',f:()=>{const q=r(2,9)*pick([-1,1]),d=r(2,9)*pick([-1,1]),t=q*d;return U(`${fm(t)} ÷ ${d<0?'('+fm(d)+')':d}`,fm(q),[-q,q+1,t+d].map(fm).filter(x=>x!==fm(q)),{say:`${fm(t)} divided by ${fm(d)}`})}},
+ {id:'eq2',g:'7',n:'Two-step equations',f:()=>{const a=r(2,9),x=r(1,12),b=r(1,20);return N(`${a}x + ${b} = ${a*x+b}`,x,{say:`${a} x plus ${b} equals ${a*x+b}. What is x?`})}},
+ {id:'proportion',g:'7',n:'Proportions',f:()=>{const a=r(2,6),b=r(2,9),k=r(2,5);return N(`${a}/${b} = ${a*k}/x`,b*k,{spread:b,say:`${a} over ${b} equals ${a*k} over x. What is x?`})}},
+ {id:'pctchange',g:'7',n:'Discounts',f:()=>{const p=10*r(2,20),d=pick([10,20,25,50]),off=p*d/100,v=p-off;return U(`$${p} item, ${d}% off. Sale price?`,money(v),[off,p+off,p-d].filter(x=>x>0&&x!==v).map(money),{say:`A ${p} dollar item is ${d} percent off. What is the sale price?`})}},
+ {id:'tip',g:'7',n:'Tax and tips',f:()=>{const b=10*r(2,9),t=pick([10,15,20]),tip=b*t/100,v=b+tip;return U(`$${b} bill plus a ${t}% tip. Total?`,money(v),[tip,b+t,v+b/10].filter(x=>x!==v).map(money),{say:`The bill is ${b} dollars. Add a ${t} percent tip. What is the total?`})}},
+ {id:'circle',g:'7',n:'Circles',f:()=>{const r0=r(1,9),useD=Math.random()<.3,k=pick(['circ','area']);const C1=trim((2*314*r0/100).toFixed(2)),A1=trim((314*r0*r0/100).toFixed(2));const ans=k==='circ'?C1:A1;return U(`${k==='circ'?'Circumference':'Area'} = ? (use π ≈ 3.14)`,ans,[k==='circ'?A1:C1,trim((314*r0/100).toFixed(2)),trim((314*4*r0*r0/100).toFixed(2))].filter(x=>x!==ans),{vis:circSVG(r0,useD),say:`What is the ${k==='circ'?'circumference':'area'} of the circle? Use 3.14 for pi.`})}},
+ {id:'prob',g:'7',n:'Probability',f:()=>{const a=r(1,6),b=r(1,6),c=r(1,5),t=a+b+c;return U('Chance of picking red?',`${a}/${t}`,[`${b}/${t}`,`${a}/${t-a}`,`1/${t}`,`${c}/${t}`].filter(x=>x!==`${a}/${t}`),{vis:marbles([[a,1],[b,2],[c,3]]),say:'You pick one marble without looking. What is the chance it is red?'})}},
+ {id:'combine',g:'7',n:'Combine like terms',f:()=>{const a=r(2,9),b=r(2,9),c=r(1,9);return Math.random()<.5?U(`${a}x + ${b}x`,`${a+b}x`,[`${a*b}x`,`${a+b}x²`,`${a+b}`]):U(`${a}x + ${c} + ${b}x`,`${a+b}x + ${c}`,[`${a+b+c}x`,`${a*b}x + ${c}`,`${a}x + ${b+c}`])}},
+ {id:'distrib',g:'7',n:'Distributive property',f:()=>{const a=r(2,9),b=r(2,9);return U(`${a}(x + ${b})`,`${a}x + ${a*b}`,[`${a}x + ${b}`,`x + ${a*b}`,`${a}x + ${a+b}`],{say:`${a} times the quantity x plus ${b}`})}},
+ {id:'angles7',g:'7',n:'Angle pairs',f:()=>{const s=Math.random()<.5,a=s?r(20,160):r(10,80);return U(`${s?'Supplement':'Complement'} of ${a}°`,(s?180:90)-a+'°',[(s?90:180)-a,(s?180:90)-a+10,a].filter(x=>x>0).map(x=>x+'°'),{say:`What is the ${s?'supplement':'complement'} of a ${a} degree angle?`})}},
+ {id:'scale',g:'7',n:'Scale drawings',f:()=>{const k=pick([5,10,20,25,50]),n=r(2,9);return N(`Map: 1 inch = ${k} miles. ${n} inches = ? miles`,n*k,{spread:k,say:`On a map, 1 inch is ${k} miles. How many miles is ${n} inches?`})}},
+ {id:'inequal',g:'7',n:'Inequalities',f:()=>{const a=r(2,9),b=r(a+1,20),gt=Math.random()<.5,s=gt?'>':'<',o=gt?'<':'>';return U(`x + ${a} ${s} ${b}`,`x ${s} ${b-a}`,[`x ${o} ${b-a}`,`x ${s} ${b+a}`,`x ${s} ${b}`],{say:`x plus ${a} is ${gt?'greater':'less'} than ${b}. Solve for x.`})}},
+ /* 8th */
+ {id:'sqrt',g:'8',n:'Square roots',f:()=>{const n=r(2,15);return U(`√${n*n}`,n,[n*n/2,n+1,n-1,2*n].filter(x=>Number.isInteger(x)),{say:`the square root of ${n*n}`})}},
+ {id:'cuberoot',g:'8',n:'Cube roots',f:()=>{const n=r(2,10);return U(`∛${n**3}`,n,[n**2,n+1,n-1,Math.round(n**3/3)],{say:`the cube root of ${n**3}`})}},
+ {id:'sci',g:'8',n:'Scientific notation',f:()=>{const m=10*r(1,9)+r(1,9),e=r(3,7),v=m*10**(e-1),s=String(m)[0]+'.'+String(m)[1];return U(`Write ${F(v)}`,`${s} × 10${sup(e)}`,[`${m} × 10${sup(e-1)}`,`${s} × 10${sup(e-1)}`,`${s} × 10${sup(e+1)}`],{say:`Write ${v} in scientific notation`})}},
+ {id:'expo2',g:'8',n:'Exponent rules',f:()=>{const b=pick([2,3,5,'x']),m=r(2,6),n=r(2,6);if(Math.random()<.5)return U(`${b}${sup(m)} × ${b}${sup(n)} = ${b}^?`,m+n,[m*n,Math.abs(m-n)||m+n+1,m+n+1],{say:`${b} to the ${m} times ${b} to the ${n} equals ${b} to what power?`});const M=Math.max(m,n)+r(1,3),k=Math.min(m,n);return U(`${b}${sup(M)} ÷ ${b}${sup(k)} = ${b}^?`,M-k,[M+k,M*k,M-k+1],{say:`${b} to the ${M} divided by ${b} to the ${k} equals ${b} to what power?`})}},
+ {id:'slope',g:'8',n:'Slope',f:()=>{const m=pick([-3,-2,-1,1,2,3]),x1=r(0,3),dx=r(1,4),y1=r(0,4),x2=x1+dx,y2=y1+m*dx;return U(`Slope through (${x1}, ${y1}) and (${x2}, ${y2})`,fm(m),[-m,m+1,dx,y2-y1].map(fm).filter(x=>x!==fm(m)),{say:`What is the slope of the line through ${x1} comma ${y1} and ${x2} comma ${y2}?`})}},
+ {id:'linear',g:'8',n:'Linear equations',f:()=>{const m=r(-4,5)||2,b=r(-6,8),x=r(-3,5),y=m*x+b;return U(`y = ${fm(m)}x ${b<0?'−':'+'} ${Math.abs(b)}. Find y when x = ${fm(x)}`,fm(y),[y+m,y-b,m+x+b,-y].map(fm).filter(v=>v!==fm(y)),{say:`y equals ${fm(m)} x ${b<0?'minus':'plus'} ${Math.abs(b)}. What is y when x is ${fm(x)}?`})}},
+ {id:'pyth',g:'8',n:'Pythagorean theorem',f:()=>{const [a,b,c]=pick([[3,4,5],[6,8,10],[5,12,13],[8,15,17],[9,12,15],[12,16,20]]);if(Math.random()<.6)return U('Find the long side',c,[a+b,c+1,c-1,Math.round((a+b)/2)],{vis:rtSVG(a,b,'?'),say:'Find the length of the longest side. a squared plus b squared equals c squared.'});return U('Find the missing side',b,[c-a,c+a,b+1,b-1].filter(x=>x>0&&x!==b),{vis:rtSVG(a,'?',c),say:'Find the missing side of the right triangle.'})}},
+ {id:'eqvar',g:'8',n:'Variables on both sides',f:()=>{const c=r(2,6),a=c+r(1,4),x=r(1,10),b=r(1,12),d=(a-c)*x+b;return N(`${a}x + ${b} = ${c}x + ${d}`,x,{say:`${a} x plus ${b} equals ${c} x plus ${d}. What is x?`})}},
+ {id:'system',g:'8',n:'Systems of equations',f:()=>{const x=r(3,12),y=r(1,x-1);return N(`x + y = ${x+y} and x − y = ${x-y}. x = ?`,x,{say:`x plus y equals ${x+y}, and x minus y equals ${x-y}. What is x?`})}},
+ {id:'irr',g:'8',n:'Rational or irrational',f:()=>U('Which is irrational?',pick(['√2','√3','√5','√7','π','√10']),['√4','√9','√16','0.75','2/3','−5','√25','1.5']) ,},
+ {id:'volcyl',g:'8',n:'Volume of cylinders',f:()=>{const r0=r(1,6),h=r(2,10),v=r0*r0*h;return U(`Cylinder: r = ${r0}, h = ${h}. Volume?`,`${v}π`,[`${2*r0*h}π`,`${r0*h}π`,`${2*v}π`].filter(x=>x!==`${v}π`),{say:`A cylinder has radius ${r0} and height ${h}. What is its volume, in terms of pi?`})}},
+ {id:'func',g:'8',n:'Function rules',f:()=>{const m=r(2,5),b=r(-3,6),xs=[1,2,3],ys=xs.map(x=>m*x+b);const rule=(mm,bb)=>`y = ${mm}x ${bb<0?'−':'+'} ${Math.abs(bb)}`;return U(`x: 1, 2, 3 → y: ${ys.map(fm).join(', ')}`,rule(m,b),[rule(m+1,b-1),rule(m,b+m),rule(m-1,b+1)],{say:`When x is 1, 2, 3, y is ${ys.map(fm).join(', ')}. What is the rule?`})}},
+ {id:'transform',g:'8',n:'Translations',f:()=>{const x=r(1,4),y=r(1,4),dx=r(1,3),dy=r(1,3);return U(`Move the blue dot right ${dx}, up ${dy}`,`(${x+dx}, ${y+dy})`,[`(${x+dy}, ${y+dx})`,`(${x+dx}, ${y-dy>0?y-dy:y+dy+1})`,`(${y+dy}, ${x+dx})`,`(${x-dx>0?x-dx:x+dx+1}, ${y+dy})`],{vis:coordSVG([[x,y]]),say:`Move the dot right ${dx} and up ${dy}. Where does it land?`})}},
+ {id:'angsum',g:'8',n:'Triangle angles',f:()=>{const a=r(30,80),b=r(30,180-a-20),c=180-a-b;return U(`A triangle has angles ${a}° and ${b}°. Third angle?`,c+'°',[c+10,180-a,360-a-b].map(x=>x+'°'),{say:`A triangle has angles of ${a} and ${b} degrees. What is the third angle?`})}},
+];
+const ORDER2=['count5','shapes','count10','next','more','pattern','add5','sub5','add10','sub10','count20','compare','doubles','make10','add20','sub20','missadd','shapes2','timehr','tens','plus10','word1','add2d','placeval','add2dr','sub2d','skip','evenodd','numline','coins','ruler','time5','coinsq','arrays','word2','x2510','x34','xall','div','missmul','frac','round10','round100','area','perim','elapsed','word3','x2d1d','x10','eqfrac','fraccmp','deccmp','divr','change','word4','dec','decx','fracadd','ooo','x2d2d','vol','pct','neg','ratio','unitrate','expo','mean','eq1'];
+
+/* ---------- the ladder: teaching order, K to 8th ---------- */
+const GR={K:0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8};
+const BYID={};SK0.concat(SK1,SK2).forEach(s=>BYID[s.id]=s);
+const ORDER=[
+ 'count5','shapes','count10','next','k3d','more','pattern','longer','add5','sub5','teen','add10','sub10',
+ 'count20','compare','tally','doubles','make10','add20','sub20','add3','missadd','addtens','shapes2','halves','timehr','tens','plus10','word1',
+ 'add2d','placeval','expanded','add2dr','sub2d','compare3','more100','skip','evenodd','numline','coins','ruler','time5','add3d','sub3d','bargraph','coinsq','arrays','word2',
+ 'x2510','x34','xall','div','missmul','mult10','frac','fracline','round10','round100','sub3dr','rule','area','perim','scalegraph','elapsed','word3',
+ 'x2d1d','x10','factor','prime','add4d','div4','eqfrac','fraccmp','mixed','dec100','deccmp','divr','roundbig','angle','convert','change','word4',
+ 'dec','decsub','decround','decx','fracadd','fracsub','fracmul','fracdivunit','pow10','ooo','x2d2d','longdiv','coord','vol',
+ 'pct','neg','absval','ratio','unitrate','gcf','lcm','fracdiv','decdiv','evalexp','expo','areatri','mean','median','eq1',
+ 'intadd','intsub','intmul','intdiv','combine','distrib','eq2','inequal','proportion','scale','pctchange','tip','angles7','circle','prob',
+ 'sqrt','cuberoot','expo2','sci','irr','eqvar','system','func','linear','slope','pyth','angsum','transform','volcyl'];
 const SK=ORDER.map(id=>BYID[id]);
 const IDX={};SK.forEach((s,i)=>IDX[s.id]=i);
 const ALL=SK.map((s,i)=>i);
@@ -518,17 +664,25 @@ const OLD_IDS=SK0.map(s=>s.id);
 
 /* ---------- game modules: each is a slice of the ladder ---------- */
 const MODULES=[
- {id:'count',n:'Counting',gl:'123',gr:'K–2',ids:['count5','count10','next','more','count20','compare','tens','plus10','placeval','skip','evenodd']},
- {id:'addsub',n:'Add & Subtract',gl:'+ −',gr:'K–2',ids:['add5','sub5','add10','sub10','doubles','make10','add20','sub20','missadd','add2d','add2dr','sub2d']},
- {id:'shapes',n:'Shapes & Patterns',gl:'△',gr:'K–1',ids:['shapes','pattern','shapes2']},
+ {id:'count',n:'Counting & Place Value',gl:'123',gr:'K–4',ids:['count5','count10','next','more','teen','count20','compare','tens','plus10','placeval','expanded','compare3','more100','skip','evenodd','roundbig']},
+ {id:'addsub',n:'Add & Subtract',gl:'+ −',gr:'K–4',ids:['add5','sub5','add10','sub10','doubles','make10','add20','sub20','add3','missadd','addtens','add2d','add2dr','sub2d','add3d','sub3d','sub3dr','add4d']},
+ {id:'shapes',n:'Shapes & Patterns',gl:'△',gr:'K–1',ids:['shapes','k3d','pattern','shapes2','halves']},
  {id:'clock',n:'Clock Tower',gl:'3:00',gr:'1–3',ids:['timehr','time5','elapsed']},
  {id:'money',n:'Money Jar',gl:'25¢',gr:'2–4',ids:['coins','coinsq','change']},
- {id:'times',n:'Times & Divide',gl:'×',gr:'2–5',ids:['arrays','x2510','x34','xall','div','missmul','x2d1d','x10','divr','x2d2d']},
- {id:'line',n:'Number Line',gl:'↔',gr:'2–6',ids:['numline','round10','round100','neg']},
- {id:'frac',n:'Fractions & Decimals',gl:'½',gr:'3–6',ids:['frac','eqfrac','fraccmp','deccmp','dec','decx','fracadd','pct']},
- {id:'measure',n:'Measuring',gl:'in',gr:'2–5',ids:['ruler','area','perim','vol']},
+ {id:'data',n:'Data & Graphs',gl:'▮▮',gr:'1–7',ids:['tally','bargraph','scalegraph','mean','median','prob']},
+ {id:'times',n:'Times & Divide',gl:'×',gr:'2–5',ids:['arrays','x2510','x34','xall','div','missmul','mult10','x2d1d','x10','div4','divr','x2d2d','longdiv']},
+ {id:'factors',n:'Factors & Primes',gl:'7',gr:'4–6',ids:['factor','prime','gcf','lcm']},
+ {id:'line',n:'Number Line',gl:'↔',gr:'2–6',ids:['numline','round10','round100','fracline','decround','neg','absval']},
+ {id:'frac',n:'Fractions',gl:'½',gr:'3–6',ids:['frac','fracline','eqfrac','fraccmp','mixed','fracadd','fracsub','fracmul','fracdivunit','fracdiv']},
+ {id:'dec',n:'Decimals & Percents',gl:'.5',gr:'4–7',ids:['dec100','deccmp','dec','decsub','decround','decx','decdiv','pct','pctchange','tip']},
+ {id:'measure',n:'Measuring',gl:'in',gr:'K–8',ids:['longer','ruler','area','perim','convert','vol','areatri','circle','volcyl']},
+ {id:'geo',n:'Geometry',gl:'∠',gr:'4–8',ids:['angle','coord','angles7','angsum','transform','pyth']},
  {id:'story',n:'Story Problems',gl:'?',gr:'1–6',ids:['word1','word2','word3','word4','unitrate']},
- {id:'puzzle',n:'Big Kid Puzzles',gl:'x²',gr:'5–6',ids:['ooo','expo','mean','ratio','eq1']},
+ {id:'ratio',n:'Ratios & Rates',gl:'2:3',gr:'6–7',ids:['ratio','unitrate','proportion','scale']},
+ {id:'integers',n:'Integers',gl:'±',gr:'6–7',ids:['neg','absval','intadd','intsub','intmul','intdiv']},
+ {id:'patterns',n:'Rules & Functions',gl:'f(x)',gr:'3–8',ids:['rule','evalexp','func','linear','slope']},
+ {id:'algebra',n:'Algebra',gl:'x',gr:'5–8',ids:['ooo','eq1','combine','distrib','eq2','inequal','eqvar','system']},
+ {id:'powers',n:'Powers & Roots',gl:'x²',gr:'5–8',ids:['pow10','expo','sqrt','cuberoot','expo2','sci','irr']},
  {id:'grid',n:'Number Grid',gl:'9×9',gr:'Free play',ids:[]},
 ];
 MODULES.forEach(M=>M.pool=M.ids.map(id=>IDX[id]).sort((a,b)=>a-b));
@@ -545,6 +699,9 @@ function masteredCount(p,pool=ALL){return pool.filter(i=>st(p,SK[i].id).m).lengt
    so a 2nd grader is not sent back to Shapes. Same-grade new skills enter normally. */
 DB.players.forEach(p=>{if(p.v>=2)return;let fo=null;for(const id of OLD_IDS){const s=p.sk[id];if(!s||!s.m){fo=id;break}}
   const fr=fo?GR[BYID[fo].g]:7;SK.forEach(s=>{if(!OLD_IDS.includes(s.id)&&!p.sk[s.id]&&GR[s.g]<fr)st(p,s.id).m=true});p.v=2});
+/* v3 added 74 more skills (K-8). Same rule: new skills below the player's level count as done. */
+DB.players.forEach(p=>{if(p.v>=3)return;let fo=null;for(const id of ORDER2){const s=p.sk[id];if(!s||!s.m){fo=id;break}}
+  const fr=fo?GR[BYID[fo].g]:9;SK2.forEach(s=>{if(!p.sk[s.id]&&GR[s.g]<fr)st(p,s.id).m=true});p.v=3});
 save();
 
 /* ---------- adaptive engine ----------
@@ -631,13 +788,13 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','
 let addGrade='K',addColor=COLORS[0];
 function renderAdd(){
   $('#pname').value='';addColor=COLORS[DB.players.length%COLORS.length];addGrade='K';setColor(addColor);
-  const gs=$('#gradeSeg');gs.innerHTML='';GRADES.slice(0,5).forEach(([g,l])=>{const b=document.createElement('button');b.type='button';b.textContent=g==='K'?'Pre-K / K':l+' grade';b.setAttribute('aria-pressed',g===addGrade);b.onclick=()=>{addGrade=g;[...gs.children].forEach(c=>c.setAttribute('aria-pressed',c===b))};gs.appendChild(b)});
+  const gs=$('#gradeSeg');gs.innerHTML='';GRADES.forEach(([g,l])=>{const b=document.createElement('button');b.type='button';b.textContent=g==='K'?'Pre-K / K':l+' grade';b.setAttribute('aria-pressed',g===addGrade);b.onclick=()=>{addGrade=g;[...gs.children].forEach(c=>c.setAttribute('aria-pressed',c===b))};gs.appendChild(b)});
   const cs=$('#colorSeg');cs.innerHTML='';COLORS.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='sw';b.style.background=c;b.setAttribute('aria-label','Color');b.setAttribute('aria-pressed',c===addColor);b.onclick=()=>{addColor=c;setColor(c);[...cs.children].forEach(x=>x.setAttribute('aria-pressed',x===b))};cs.appendChild(b)});
   setTimeout(()=>{try{$('#pname').focus()}catch(e){}},50);
 }
 $('#addForm').addEventListener('submit',e=>{
   e.preventDefault();const name=$('#pname').value.trim();if(!name)return;
-  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{},v:2};
+  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{},v:3};
   const start=SK.findIndex(s=>s.g===addGrade);for(let i=0;i<start;i++)st(p,SK[i].id).m=true;
   DB.players.push(p);save();P=p;go('map');
 });
@@ -673,7 +830,7 @@ function renderMap(){
   });
   if(kid&&P.read)speak(`Hi ${P.name}! Tap Play. Or pick a game.`,'cheer');
 }
-function climbRank(p){const fi=frontier(p);return fi>=0?GR[SK[fi].g]:7}
+function climbRank(p){const fi=frontier(p);return fi>=0?GR[SK[fi].g]:9}
 let showAll=false;
 function isKid(p){return !showAll&&climbRank(p)<=1}
 $('#playBtn').onclick=()=>startRound(ALL,'Climb');
