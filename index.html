@@ -159,6 +159,30 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .readout .arr .dot{width:18px;height:18px}
 .readout .arr{gap:5px}
 .toolrow{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+/* Games grid + new visuals */
+:root{--c1:#E2483D;--c2:#2F7DDB;--c3:#2EA35A;--c4:#F2B526;--copper:#C98048;--silver:#C3CBD6;--coinink:#262A33;--rule:#F7E2A0;--ruleink:#5B4A16}
+.sect{font-family:var(--display);font-size:1.6rem;margin:0 0 12px}
+.mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+.mod{text-align:left;background:var(--card);border:2px solid var(--line);border-radius:20px;padding:14px;display:grid;gap:8px;align-content:start;box-shadow:0 4px 0 var(--line);min-width:0}
+.mod:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.mod.ready{border-color:var(--pc);box-shadow:0 4px 0 color-mix(in srgb,var(--pc) 45%,var(--line))}
+.mod .mt{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.mod .gl{width:54px;height:54px;border-radius:14px;background:var(--pcsoft);color:var(--pc);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1;white-space:nowrap}
+.mod .gr{font-size:.74rem;font-weight:700;color:var(--muted);border:1.5px solid var(--line);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.mod h3{font-size:1.25rem}
+.mod small{color:var(--muted);font-size:.82rem;line-height:1.3;overflow-wrap:anywhere}
+.mod .mb{display:block;height:8px;border-radius:99px;background:var(--pcsoft);overflow:hidden}
+.mod .mb i{display:block;height:100%;background:var(--pc)}
+.tag{justify-self:start;font-size:.74rem;font-weight:700;color:#fff;background:var(--pc);border-radius:99px;padding:3px 9px}
+.q.story{font-family:var(--body);font-weight:700;font-size:clamp(1.15rem,4.4vw,1.5rem);line-height:1.35;max-width:32ch}
+.pat{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.qbox{width:46px;height:46px;box-sizing:border-box;border:3px dashed var(--pc);border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.6rem;color:var(--pc)}
+.ans .shp{display:inline-block;vertical-align:middle}
+.coins{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;max-width:360px}
+.coin{border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:.8rem;color:var(--coinink);background:var(--silver);border:3px solid color-mix(in srgb,var(--silver) 60%,#000);box-sizing:border-box}
+.coin.p{width:40px;height:40px;background:var(--copper);border-color:color-mix(in srgb,var(--copper) 60%,#000)}
+.coin.n{width:46px;height:46px}.coin.d{width:36px;height:36px;font-size:.7rem}.coin.q{width:56px;height:56px;font-size:.9rem}
+.addvis .pie{width:120px;height:120px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -209,10 +233,12 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <div class="bar" aria-hidden="true"><i id="mBar"></i></div>
       <p class="now" id="mCount" style="font-size:.95rem"></p>
       <div class="row">
-        <button class="btn" id="playBtn">Play</button>
-        <button class="btn ghost" id="gridBtn">Number Grid</button>
+        <button class="btn" id="playBtn">Climb</button>
       </div>
+      <p class="now" style="font-size:.9rem;margin-top:-4px">Climb mixes everything and picks the next skill for you.</p>
     </div>
+    <h3 class="sect">Games</h3>
+    <div class="mods" id="mods"></div>
     <p class="summit">Summit</p>
     <div class="mount" id="mount"></div>
   </section>
@@ -272,8 +298,8 @@ function rods(t,o){return `<div class="rods">${'<i class="rod"></i>'.repeat(t)}<
 function arr(rw,c,cls=''){return `<div class="arr" style="grid-template-columns:repeat(${c},auto)">${`<i class="dot ${cls}"></i>`.repeat(rw*c)}</div>`}
 function pie(n,d){const R=66,cx=75,cy=75;let s=`<svg viewBox="0 0 150 150" class="pie" role="img" aria-label="${n} of ${d} parts shaded">`;for(let i=0;i<d;i++){const a0=i/d*2*Math.PI-Math.PI/2,a1=(i+1)/d*2*Math.PI-Math.PI/2;s+=`<path class="${i<n?'on':'off'}" d="M${cx},${cy} L${(cx+R*Math.cos(a0)).toFixed(2)},${(cy+R*Math.sin(a0)).toFixed(2)} A${R},${R} 0 0 1 ${(cx+R*Math.cos(a1)).toFixed(2)},${(cy+R*Math.sin(a1)).toFixed(2)} Z"/>`}return s+'</svg>'}
 
-/* ---------- the ladder: 35 skills, Pre-K/K to 6th ---------- */
-const SK=[
+/* ---------- original skills ---------- */
+const SK0=[
  {id:'count5',g:'K',n:'Count to 5',f:()=>{const n=r(1,5);return N('How many?',n,{vis:dots(n)})}},
  {id:'count10',g:'K',n:'Count to 10',f:()=>{const n=r(4,10);return N('How many?',n,{vis:dots(n)})}},
  {id:'more',g:'K',n:'Which is more?',f:()=>{let a=r(0,10),b=r(0,10);while(a===b)b=r(0,10);return{q:'Which is more?',a:String(Math.max(a,b)),opts:[String(a),String(b)],vis:`<div class="addvis">${dots(a)}<span class="plus">or</span>${dots(b,'b')}</div>`,say:`Which is more, ${a} or ${b}?`}}},
@@ -314,40 +340,183 @@ const SK=[
 const GRADES=[['K','K'],['1','1st'],['2','2nd'],['3','3rd'],['4','4th'],['5','5th'],['6','6th']];
 const COLORS=['#2C7FD0','#E0507A','#21985E','#8757D2','#E07A22','#0F9AA0'];
 
+/* ---------- new visuals ---------- */
+const C=['','var(--c1)','var(--c2)','var(--c3)','var(--c4)'];
+const CN=['','red','blue','green','yellow'];
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const F=x=>Number(x).toLocaleString('en-US');
+function pts(n,r=42,rot=-90){return [...Array(n)].map((_,i)=>{const a=(rot+i*360/n)*Math.PI/180;return (50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)}).join(' ')}
+function shapeSVG(k,col,sz){
+  const S=`style="fill:${col};stroke:var(--ink)" stroke-width="3" stroke-linejoin="round"`;let e;
+  if(k==='circle')e=`<circle cx="50" cy="50" r="40" ${S}/>`;
+  else if(k==='oval')e=`<ellipse cx="50" cy="50" rx="44" ry="27" ${S}/>`;
+  else if(k==='square')e=`<rect x="15" y="15" width="70" height="70" ${S}/>`;
+  else if(k==='rectangle')e=`<rect x="5" y="27" width="90" height="46" ${S}/>`;
+  else if(k==='triangle')e=`<polygon points="50,10 92,86 8,86" ${S}/>`;
+  else if(k==='rhombus')e=`<polygon points="50,5 84,50 50,95 16,50" ${S}/>`;
+  else if(k==='trapezoid')e=`<polygon points="30,24 70,24 94,78 6,78" ${S}/>`;
+  else if(k==='star'){const p=[...Array(10)].map((_,i)=>{const a=(-90+i*36)*Math.PI/180,rr=i%2?19:45;return (50+rr*Math.cos(a)).toFixed(1)+','+(52+rr*Math.sin(a)).toFixed(1)}).join(' ');e=`<polygon points="${p}" ${S}/>`}
+  else e=`<polygon points="${pts({pentagon:5,hexagon:6,octagon:8}[k])}" ${S}/>`;
+  return `<svg class="shp" viewBox="0 0 100 100" width="${sz}" height="${sz}" aria-hidden="true">${e}</svg>`;
+}
+const tokSVG=(t,sz)=>{const [s,c]=t.split('|');return shapeSVG(s,C[c],sz)};
+const fmtT=(h,m)=>{h=((h-1)%12+12)%12+1;return h+':'+String(m).padStart(2,'0')};
+const fmtM=x=>fmtT(Math.floor(x/60),((x%60)+60)%60);
+function clockSVG(h,m){
+  let s=`<circle cx="100" cy="100" r="92" style="fill:var(--card);stroke:var(--ink)" stroke-width="6"/>`;
+  for(let i=0;i<60;i++){const a=i*6*Math.PI/180,L=i%5?6:13;s+=`<line x1="${(100+(86-L)*Math.sin(a)).toFixed(1)}" y1="${(100-(86-L)*Math.cos(a)).toFixed(1)}" x2="${(100+86*Math.sin(a)).toFixed(1)}" y2="${(100-86*Math.cos(a)).toFixed(1)}" style="stroke:var(--muted)" stroke-width="${i%5?2:4}"/>`}
+  for(let n=1;n<=12;n++){const a=n*30*Math.PI/180;s+=`<text x="${(100+64*Math.sin(a)).toFixed(1)}" y="${(100-64*Math.cos(a)+8).toFixed(1)}" text-anchor="middle" style="fill:var(--ink);font:800 22px var(--display)">${n}</text>`}
+  const ha=((h%12)+m/60)*30*Math.PI/180,ma=m*6*Math.PI/180;
+  s+=`<line x1="100" y1="100" x2="${(100+46*Math.sin(ha)).toFixed(1)}" y2="${(100-46*Math.cos(ha)).toFixed(1)}" style="stroke:var(--ink)" stroke-width="9" stroke-linecap="round"/>`;
+  s+=`<line x1="100" y1="100" x2="${(100+74*Math.sin(ma)).toFixed(1)}" y2="${(100-74*Math.cos(ma)).toFixed(1)}" style="stroke:var(--pc)" stroke-width="6" stroke-linecap="round"/><circle cx="100" cy="100" r="7" style="fill:var(--ink)"/>`;
+  return `<svg viewBox="0 0 200 200" width="190" height="190" role="img" aria-label="clock">${s}</svg>`;
+}
+function coinsVis(q,d,n,p){return `<div class="coins">${'<i class="coin q">25¢</i>'.repeat(q)}${'<i class="coin d">10¢</i>'.repeat(d)}${'<i class="coin n">5¢</i>'.repeat(n)}${'<i class="coin p">1¢</i>'.repeat(p)}</div>`}
+function numlineSVG(v){
+  const x=t=>20+t/100*320;let s=`<line x1="14" y1="50" x2="346" y2="50" style="stroke:var(--ink)" stroke-width="3"/>`;
+  for(let t=0;t<=100;t+=5){const M=t%10===0;s+=`<line x1="${x(t)}" y1="${M?42:45}" x2="${x(t)}" y2="${M?58:55}" style="stroke:var(--ink)" stroke-width="${M?3:2}"/>`;if(M)s+=`<text x="${x(t)}" y="76" text-anchor="middle" style="fill:var(--muted);font:700 13px var(--body)">${t}</text>`}
+  s+=`<polygon points="${x(v)-9},14 ${x(v)+9},14 ${x(v)},36" style="fill:var(--pc)"/>`;
+  return `<svg viewBox="0 0 360 84" width="360" style="max-width:100%;height:auto" role="img" aria-label="number line">${s}</svg>`;
+}
+function rulerSVG(st0,n){
+  const x0=20,u=40;let s=`<rect x="${x0+st0*u}" y="12" width="${n*u}" height="24" rx="6" style="fill:var(--pc)"/>`;
+  s+=`<rect x="8" y="46" width="344" height="40" rx="4" style="fill:var(--rule);stroke:var(--ruleink)" stroke-width="2"/>`;
+  for(let i=0;i<=16;i++){const xx=x0+i*u/2;s+=`<line x1="${xx}" y1="46" x2="${xx}" y2="${i%2?56:64}" style="stroke:var(--ruleink)" stroke-width="2"/>`;if(i%2===0)s+=`<text x="${xx}" y="80" text-anchor="middle" style="fill:var(--ruleink);font:700 12px var(--body)">${i/2}</text>`}
+  return `<svg viewBox="0 0 360 92" width="360" style="max-width:100%;height:auto" role="img" aria-label="ruler in inches">${s}</svg>`;
+}
+function areaSVG(w,h){const c=28;let s='';for(let i=0;i<w;i++)for(let j=0;j<h;j++)s+=`<rect x="${2+i*c}" y="${2+j*c}" width="${c}" height="${c}" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="2"/>`;return `<svg viewBox="0 0 ${w*c+4} ${h*c+4}" width="${w*c+4}" style="max-width:100%;height:auto" role="img" aria-label="${w} by ${h} grid">${s}</svg>`}
+function perimSVG(w,h){
+  const sc=Math.min(200/w,110/h),rw=w*sc,rh=h*sc,X=60,Y=24,T=(x,y,t,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}" style="fill:var(--ink);font:700 15px var(--body)">${t}</text>`;
+  const s=`<rect x="${X}" y="${Y}" width="${rw}" height="${rh}" rx="3" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="4"/>`+T(X+rw/2,Y-8,w+' cm')+T(X+rw/2,Y+rh+20,w+' cm')+T(X-8,Y+rh/2+5,h+' cm','end')+T(X+rw+8,Y+rh/2+5,h+' cm','start');
+  return `<svg viewBox="0 0 ${rw+120} ${rh+50}" width="${rw+120}" style="max-width:100%;height:auto" role="img" aria-label="rectangle ${w} by ${h}">${s}</svg>`;
+}
+function volSVG(l,w,h){
+  const u=24,dx=11,dy=-11,X=20,Y=20+w*-dy;let s='';const L=(a,b,c,d)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" style="stroke:var(--pc)" stroke-width="2"/>`;
+  s+=`<polygon points="${X},${Y} ${X+l*u},${Y} ${X+l*u+w*dx},${Y+w*dy} ${X+w*dx},${Y+w*dy}" style="fill:var(--card);stroke:var(--pc)" stroke-width="2"/>`;
+  s+=`<polygon points="${X+l*u},${Y} ${X+l*u+w*dx},${Y+w*dy} ${X+l*u+w*dx},${Y+w*dy+h*u} ${X+l*u},${Y+h*u}" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="2"/>`;
+  s+=`<rect x="${X}" y="${Y}" width="${l*u}" height="${h*u}" style="fill:var(--pcsoft);stroke:var(--pc)" stroke-width="2"/>`;
+  for(let i=1;i<l;i++)s+=L(X+i*u,Y,X+i*u,Y+h*u)+L(X+i*u,Y,X+i*u+w*dx,Y+w*dy);
+  for(let j=1;j<h;j++)s+=L(X,Y+j*u,X+l*u,Y+j*u)+L(X+l*u,Y+j*u,X+l*u+w*dx,Y+j*u+w*dy);
+  for(let k=1;k<w;k++)s+=L(X+k*dx,Y+k*dy,X+l*u+k*dx,Y+k*dy)+L(X+l*u+k*dx,Y+k*dy,X+l*u+k*dx,Y+k*dy+h*u);
+  const T=(x,y,t,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}" style="fill:var(--ink);font:700 14px var(--body)">${t}</text>`;
+  s+=T(X+l*u/2,Y+h*u+18,l)+T(X-6,Y+h*u/2+5,h,'end')+T(X+l*u+w*dx+6,Y+h*u+w*dy/2+12,w,'start');
+  const W=X+l*u+w*dx+30,H=Y+h*u+26;
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:100%;height:auto" role="img" aria-label="box ${l} by ${w} by ${h}">${s}</svg>`;
+}
+const CMP=['<','=','>'],CMPL={'<':'less than','=':'equal to','>':'greater than'};
+function cmpQ(q,x,y,say,vis=''){return{q,a:x<y?'<':x>y?'>':'=',opts:CMP.slice(),lab:CMPL,vis,say}}
+const PAL=[['Pip the pup','he'],['Lulu the cat','she'],['Max the frog','he'],['Rosie the hen','she'],['Gus the goat','he'],['Bea the bear','she']];
+const TH=['stickers','apples','rocks','shells','cookies','crayons','acorns','marbles'];
+const SUP={2:'²',3:'³',4:'⁴'};
+
+/* ---------- new skills (added to the ladder below) ---------- */
+const SK1=[
+ {id:'shapes',g:'K',n:'Shapes',f:()=>{const k=pick(['circle','square','triangle','rectangle','oval','star']);return U('What shape is this?',cap(k),['Circle','Square','Triangle','Rectangle','Oval','Star'],{vis:shapeSVG(k,C[r(1,4)],140)})}},
+ {id:'next',g:'K',n:'What comes next?',f:()=>{if(Math.random()<.75){const n=r(0,7);return N(`${n}, ${n+1}, ${n+2}, ?`,n+3,{say:`${n}, ${n+1}, ${n+2}. What comes next?`})}const m=r(2,9);return N(`?, ${m}, ${m+1}`,m-1,{say:`What number comes before ${m}?`})}},
+ {id:'pattern',g:'K',n:'Patterns',f:()=>{const t=pick([[0,1],[0,0,1],[0,1,1],[0,1,2]]);const sh=shuffle(['circle','square','triangle','star']),co=shuffle([1,2,3,4]);const tok=i=>`${sh[i]}|${co[i]}`;const L=Math.max(5,t.length*2);const seq=[...Array(L)].map((_,i)=>tok(t[i%t.length]));const a=tok(t[L%t.length]);const opts=shuffle([...new Set(t)].map(tok).concat(tok(Math.max(...t)+1)));const oh={},lab={};opts.forEach(o=>{oh[o]=tokSVG(o,64);const [s,c]=o.split('|');lab[o]=`the ${CN[c]} ${s}`});return{q:'What comes next?',a,opts,oh,lab,vis:`<div class="pat">${seq.map(x=>tokSVG(x,46)).join('')}<span class="qbox">?</span></div>`,say:'What comes next in the pattern?'}}},
+ {id:'compare',g:'1',n:'Greater or less',f:()=>{const a=r(0,99);const b=Math.random()<.15?a:r(0,99);return cmpQ(`${a}  ?  ${b}`,a,b,`Is ${a} less than, equal to, or greater than ${b}?`)}},
+ {id:'doubles',g:'1',n:'Doubles',f:()=>{const a=r(1,10);return N(`${a} + ${a}`,2*a,{vis:a<=6?addVis(a,a):''})}},
+ {id:'missadd',g:'1',n:'Missing number',f:()=>{const c=r(6,20),a=r(1,c-1);return N(`${a} + ? = ${c}`,c-a,{say:`${a} plus what equals ${c}?`})}},
+ {id:'shapes2',g:'1',n:'More shapes',f:()=>{const SD={triangle:3,square:4,rectangle:4,rhombus:4,trapezoid:4,pentagon:5,hexagon:6,octagon:8};const k=pick(Object.keys(SD));if(Math.random()<.5)return N('How many sides?',SD[k],{vis:shapeSVG(k,C[r(1,4)],140)});const k2=pick(['rhombus','trapezoid','pentagon','hexagon','octagon']);return U('What shape is this?',cap(k2),['Rhombus','Trapezoid','Pentagon','Hexagon','Octagon','Square'],{vis:shapeSVG(k2,C[r(1,4)],140)})}},
+ {id:'timehr',g:'1',n:'Clocks: hour and half hour',f:()=>{const h=r(1,12),m=pick([0,30]);return U('What time is it?',fmtT(h,m),[fmtT(h,30-m),fmtT(h+1,m),fmtT(h-1,m),fmtT(h+1,30-m)],{vis:clockSVG(h,m)})}},
+ {id:'word1',g:'1',n:'Story problems to 20',f:()=>{const [nm,pr]=pick(PAL),th=pick(TH);if(Math.random()<.5){const a=r(3,12),b=r(2,8);return N(`${nm} has ${a} ${th}. ${cap(pr)} finds ${b} more. How many ${th} now?`,a+b)}const a=r(8,18),b=r(2,a-2);return N(`${nm} has ${a} ${th}. ${cap(pr)} gives ${b} away. How many are left?`,a-b)}},
+ {id:'placeval',g:'2',n:'Place value',f:()=>{const n=r(100,999),ds=String(n),i=r(0,2),pl=['hundreds','tens','ones'][i];return U(`In ${n}, which digit is in the ${pl} place?`,ds[i],[...ds,...shuffle('0123456789'.split(''))])}},
+ {id:'numline',g:'2',n:'Number line',f:()=>{const v=5*r(1,19);return U('What number is the arrow on?',v,[v+5,v-5,v+10,v-10].filter(x=>x>=0&&x<=100),{vis:numlineSVG(v)})}},
+ {id:'coins',g:'2',n:'Count coins',f:()=>{let d,n,p,t;do{d=r(0,4);n=r(0,3);p=r(0,5);t=10*d+5*n+p}while(t<3);return U('How much money?',t+'¢',[t+1,t-1,t+5,t-5,t+10,d+n+p].filter(x=>x>0&&x!==t).map(x=>x+'¢'),{vis:coinsVis(0,d,n,p)})}},
+ {id:'ruler',g:'2',n:'Measure with a ruler',f:()=>{const s=pick([0,0,1]),n=r(1,8-s);return U('How many inches long is the bar?',n,[s+n,n+1,n+2,n-1].filter(x=>x>0),{vis:rulerSVG(s,n)})}},
+ {id:'time5',g:'2',n:'Clocks to 5 minutes',f:()=>{const h=r(1,12),m=5*r(0,11);return U('What time is it?',fmtT(h,m),[fmtT(h,(m+5)%60),fmtT(h,(m+55)%60),fmtT(h+1,m),fmtT(h,m/5)],{vis:clockSVG(h,m)})}},
+ {id:'coinsq',g:'2',n:'Coins with quarters',f:()=>{let q,d,n,p,t;do{q=r(1,3);d=r(0,3);n=r(0,2);p=r(0,4);t=25*q+10*d+5*n+p}while(t>99);return U('How much money?',t+'¢',[t+1,t-1,t+5,t-5,t+10,t-10].filter(x=>x>0&&x<100).map(x=>x+'¢'),{vis:coinsVis(q,d,n,p)})}},
+ {id:'word2',g:'2',n:'Story problems to 100',f:()=>{const [nm,pr]=pick(PAL),th=pick(TH),k=r(0,2);if(k===0){const a=r(15,60),b=r(10,39);return N(`${nm} has ${a} ${th}. ${cap(pr)} gets ${b} more. How many ${th} now?`,a+b,{spread:10})}if(k===1){const a=r(40,99),b=r(11,a-10);return N(`${nm} has ${a} ${th}. ${cap(pr)} uses ${b}. How many are left?`,a-b,{spread:10})}let o=pick(PAL);while(o[0]===nm)o=pick(PAL);const a=r(30,90),b=r(10,a-5);return N(`${nm} has ${a} ${th}. ${o[0]} has ${b}. How many more does ${nm.split(' ')[0]} have?`,a-b,{spread:10})}},
+ {id:'missmul',g:'3',n:'Missing factor',f:()=>{const a=r(2,9),b=r(2,9);return N(`? × ${b} = ${a*b}`,a,{say:`What times ${b} equals ${a*b}?`})}},
+ {id:'round100',g:'3',n:'Round to 100',f:()=>{const n=r(101,989),a=Math.round(n/100)*100;return U(`Round ${n} to the nearest 100`,a,[a-100,a+100,Math.round(n/10)*10,a+200].filter(x=>x>0),{say:`Round ${n} to the nearest hundred`})}},
+ {id:'area',g:'3',n:'Area',f:()=>{const w=r(2,8),h=r(2,5);return U('Area = ? squares',w*h,[2*(w+h),w*h+1,w*h-1,w*h+w,w+h],{vis:areaSVG(w,h),say:'What is the area? Count the squares.'})}},
+ {id:'perim',g:'3',n:'Perimeter',f:()=>{let w,h;do{w=r(2,12);h=r(2,9)}while(w*h===2*(w+h));return U('Perimeter = ? cm',2*(w+h),[w*h,w+h,2*w+h,2*(w+h)+2],{vis:perimSVG(w,h),say:'What is the perimeter? Add up all the sides.'})}},
+ {id:'elapsed',g:'3',n:'Elapsed time',f:()=>{const s=60*r(1,9)+pick([0,30]),d=pick([30,60,90,120,180]),e=s+d;const dt={30:'30 minutes',60:'1 hour',90:'an hour and a half',120:'2 hours',180:'3 hours'}[d];const ev=pick(['the movie','soccer practice','the party','the hike','swim lessons']);return U(`It's ${fmtM(s)}. ${cap(ev)} lasts ${dt}. What time does it end?`,fmtM(e),[fmtM(e+30),fmtM(e-30),fmtM(e+60),fmtM(s+d/2)],{vis:clockSVG(Math.floor(s/60),s%60)})}},
+ {id:'word3',g:'3',n:'Times and divide stories',f:()=>{const th=pick(TH),a=r(2,9),b=r(2,9);if(Math.random()<.5)return N(`There are ${a} bags. Each bag has ${b} ${th}. How many ${th} in all?`,a*b,{spread:b});return N(`${a*b} ${th} are split evenly into ${a} boxes. How many go in each box?`,b)}},
+ {id:'x10',g:'4',n:'Times 10, 100, 1000',f:()=>{const a=r(2,99),m=pick([10,100,1000]),v=a*m;return U(`${a} × ${F(m)}`,F(v),[F(v*10),F(v/10),F(a+m),F(v+m)])}},
+ {id:'fraccmp',g:'4',n:'Compare fractions',f:()=>{let a,d,b,e;const k=r(0,2);if(k===0){d=pick([4,5,6,8,10]);a=r(1,d-1);do{b=r(1,d-1)}while(b===a);e=d}else if(k===1){const n=r(1,3),ds=shuffle([2,3,4,5,6,8].filter(x=>x>n));a=b=n;d=ds[0];e=ds[1]}else{[a,d,b,e]=pick([[1,2,2,4],[1,2,3,6],[1,3,2,6],[2,3,4,6],[1,4,2,8],[3,4,6,8]]);if(Math.random()<.5)[a,d,b,e]=[b,e,a,d]}return cmpQ(`${a}/${d}  ?  ${b}/${e}`,a*e,b*d,`Is ${a} over ${d} less than, equal to, or greater than ${b} over ${e}?`,`<div class="addvis">${pie(a,d)}<span class="plus">vs</span>${pie(b,e)}</div>`)}},
+ {id:'deccmp',g:'4',n:'Compare decimals',f:()=>{const x=r(1,9);const y=Math.random()<.2?x*10:r(1,99);let A=`0.${x}`,B=(y/100).toFixed(2),X=x*10,Y=y;if(Math.random()<.5){[A,B]=[B,A];[X,Y]=[Y,X]}return cmpQ(`${A}  ?  ${B}`,X,Y,`Is ${A} less than, equal to, or greater than ${B}?`)}},
+ {id:'change',g:'4',n:'Making change',f:()=>{const p=5*r(3,19),a=100-p,it=pick(['juice box','pencil','toy car','bouncy ball','pack of gum']);return U(`A ${it} costs ${p}¢. You pay with $1.00. How much change do you get?`,a+'¢',[a+5,a-5,a+10,p,a+15].filter(x=>x>0&&x<100&&x!==a).map(x=>x+'¢'))}},
+ {id:'word4',g:'4',n:'Two-step stories',f:()=>{const [nm,pr]=pick(PAL),th=pick(TH);if(Math.random()<.5){const a=r(3,9),b=r(4,12),c=r(2,a*b-5);return N(`${nm} buys ${a} packs of ${b} ${th}, then gives ${c} away. How many are left?`,a*b-c,{spread:b})}const a=r(5,30),b=r(2,9),d=r(2,7);return N(`${nm} has ${a} ${th} and gets ${b} more every day for ${d} days. How many now?`,a+b*d,{spread:b})}},
+ {id:'decx',g:'5',n:'Decimals times whole numbers',f:()=>{const a=r(1,9),b=r(2,9),v=a*b,fd=x=>x%10?(x/10).toFixed(1):String(x/10);return U(`0.${a} × ${b}`,fd(v),[String(v),(v/100).toFixed(2),fd(v+b),fd(v-a)])}},
+ {id:'vol',g:'5',n:'Volume',f:()=>{const l=r(2,6),w=r(2,4),h=r(2,4);return U('Volume = ? cubes',l*w*h,[l*w,l+w+h,l*w*h+l*w,l*w*(h-1)],{vis:volSVG(l,w,h),say:'What is the volume? Multiply length, width, and height.'})}},
+ {id:'unitrate',g:'6',n:'Unit rates',f:()=>{const k=r(2,6),p=r(2,9),th=pick(['pencils','apples','cookies','toy cars','stickers']);return U(`${k} ${th} cost $${k*p}. How much does 1 cost?`,'$'+p,[p+1,p-1,k*p-k,k+p].filter(x=>x>0&&x!==p).map(x=>'$'+x))}},
+ {id:'expo',g:'6',n:'Exponents',f:()=>{const b=r(2,5),e=b<=3?r(2,4):r(2,3),v=b**e;return U(`${b}${SUP[e]}`,v,[b*e,b+e,v+b,b**(e-1)],{say:`${b} to the power of ${e}. What is it?`})}},
+ {id:'mean',g:'6',n:'Average',f:()=>{const m=r(4,20),d1=r(1,4),d2=r(1,4),v=shuffle([m-d1,m+d2,m+d1-d2]);return U(`Average of ${v.join(', ')}`,m,[3*m,m+1,m-1,Math.max(...v)],{say:`What is the average of ${v.join(', ')}?`})}},
+];
+
+/* ---------- the ladder: 68 skills in teaching order, K to 6th ---------- */
+const GR={K:0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6};
+const BYID={};SK0.concat(SK1).forEach(s=>BYID[s.id]=s);
+const ORDER=['count5','shapes','count10','next','more','pattern','add5','sub5','add10','sub10',
+ 'count20','compare','doubles','make10','add20','sub20','missadd','shapes2','timehr','tens','plus10','word1',
+ 'add2d','placeval','add2dr','sub2d','skip','evenodd','numline','coins','ruler','time5','coinsq','arrays','word2',
+ 'x2510','x34','xall','div','missmul','frac','round10','round100','area','perim','elapsed','word3',
+ 'x2d1d','x10','eqfrac','fraccmp','deccmp','divr','change','word4',
+ 'dec','decx','fracadd','ooo','x2d2d','vol',
+ 'pct','neg','ratio','unitrate','expo','mean','eq1'];
+const SK=ORDER.map(id=>BYID[id]);
+const IDX={};SK.forEach((s,i)=>IDX[s.id]=i);
+const ALL=SK.map((s,i)=>i);
+const OLD_IDS=SK0.map(s=>s.id);
+
+/* ---------- game modules: each is a slice of the ladder ---------- */
+const MODULES=[
+ {id:'count',n:'Counting',gl:'123',gr:'K–2',ids:['count5','count10','next','more','count20','compare','tens','plus10','placeval','skip','evenodd']},
+ {id:'addsub',n:'Add & Subtract',gl:'+ −',gr:'K–2',ids:['add5','sub5','add10','sub10','doubles','make10','add20','sub20','missadd','add2d','add2dr','sub2d']},
+ {id:'shapes',n:'Shapes & Patterns',gl:'△',gr:'K–1',ids:['shapes','pattern','shapes2']},
+ {id:'clock',n:'Clock Tower',gl:'3:00',gr:'1–3',ids:['timehr','time5','elapsed']},
+ {id:'money',n:'Money Jar',gl:'25¢',gr:'2–4',ids:['coins','coinsq','change']},
+ {id:'times',n:'Times & Divide',gl:'×',gr:'2–5',ids:['arrays','x2510','x34','xall','div','missmul','x2d1d','x10','divr','x2d2d']},
+ {id:'line',n:'Number Line',gl:'↔',gr:'2–6',ids:['numline','round10','round100','neg']},
+ {id:'frac',n:'Fractions & Decimals',gl:'½',gr:'3–6',ids:['frac','eqfrac','fraccmp','deccmp','dec','decx','fracadd','pct']},
+ {id:'measure',n:'Measuring',gl:'in',gr:'2–5',ids:['ruler','area','perim','vol']},
+ {id:'story',n:'Story Problems',gl:'?',gr:'1–6',ids:['word1','word2','word3','word4','unitrate']},
+ {id:'puzzle',n:'Big Kid Puzzles',gl:'x²',gr:'5–6',ids:['ooo','expo','mean','ratio','eq1']},
+ {id:'grid',n:'Number Grid',gl:'9×9',gr:'Free play',ids:[]},
+];
+MODULES.forEach(M=>M.pool=M.ids.map(id=>IDX[id]).sort((a,b)=>a-b));
+
 /* ---------- storage (per device) ---------- */
 const KEY='mathclimb.v1';let DB={players:[]};
 try{const s=localStorage.getItem(KEY);if(s)DB=JSON.parse(s)||DB}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
 let P=null;
 const st=(p,id)=>p.sk[id]||(p.sk[id]={h:[],m:false,n:0});
-function frontier(p){for(let i=0;i<SK.length;i++)if(!st(p,SK[i].id).m)return i;return -1}
-function masteredCount(p){return SK.filter(s=>st(p,s.id).m).length}
+function frontier(p,pool=ALL){for(const i of pool)if(!st(p,SK[i].id).m)return i;return -1}
+function masteredCount(p,pool=ALL){return pool.filter(i=>st(p,SK[i].id).m).length}
+/* Players made before the new skills existed: count new skills below their current grade as already done,
+   so a 2nd grader is not sent back to Shapes. Same-grade new skills enter normally. */
+DB.players.forEach(p=>{if(p.v>=2)return;let fo=null;for(const id of OLD_IDS){const s=p.sk[id];if(!s||!s.m){fo=id;break}}
+  const fr=fo?GR[BYID[fo].g]:7;SK.forEach(s=>{if(!OLD_IDS.includes(s.id)&&!p.sk[s.id]&&GR[s.g]<fr)st(p,s.id).m=true});p.v=2});
+save();
 
 /* ---------- adaptive engine ----------
    Frontier = first unmastered skill. ~70% frontier, ~30% review.
    Mastered = 9 of last 10 right (at least 10 tries). Slow on purpose.
    Struggling on frontier (<60% of last 6) -> lean on the skill below it.
    A mastered skill that slips (3+ wrong of last 5 reviews) quietly un-masters and becomes the frontier again. */
-function chooseSkill(p){
-  const fi=frontier(p);const done=SK.map((s,i)=>i).filter(i=>st(p,SK[i].id).m);
+function chooseSkill(p,pool=ALL){
+  const fi=frontier(p,pool);const done=pool.filter(i=>st(p,SK[i].id).m);
   if(fi<0)return pick(done);
+  const pos=pool.indexOf(fi);
   const h=st(p,SK[fi].id).h.slice(-6);const struggling=h.length>=6&&sum(h)/6<0.6;const x=Math.random();
-  if(struggling&&fi>0&&x<0.45)return fi-1;
+  if(struggling&&pos>0&&x<0.45)return pool[pos-1];
   if(done.length&&x>0.7){const near=done.filter(i=>i<fi).slice(-6);return pick(near.length&&Math.random()<0.7?near:done)}
   return fi;
 }
-function record(p,i,ok,ms){
+function record(p,i,ok,ms,pool=ALL){
   const s=st(p,SK[i].id);s.h.push(ok?1:0);if(s.h.length>10)s.h.shift();s.n++;
   s.t=Math.round(((s.t||ms)*0.8)+ms*0.2); /* quiet speed tracking, never shown as a clock */
   if(ok)p.stars=(p.stars||0)+1;
   let ev=null;
-  if(!s.m&&s.h.length>=10&&sum(s.h)>=9){s.m=true;const nx=frontier(p);ev={up:SK[i].n,next:nx>=0?SK[nx].n:null}}
+  if(!s.m&&s.h.length>=10&&sum(s.h)>=9){s.m=true;const nx=frontier(p,pool);ev={up:SK[i].n,next:nx>=0?SK[nx].n:null}}
   else if(s.m){const l=s.h.slice(-5);if(l.length>=5&&sum(l)<=2){s.m=false;s.h=s.h.slice(-5)}}
   save();return ev;
 }
 
 /* ---------- speech ---------- */
-function speakable(t){return t.replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals ').replace(/(^|\s)\?(\s|$)/g,' what ').replace(/(\d)\/(\d)/g,'$1 over $2')}
+function speakable(t){return t.replace(/×/g,' times ').replace(/÷/g,' divided by ').replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals ').replace(/(^|\s)\?(\s|$)/g,' what ').replace(/(\d)\/(\d)/g,'$1 over $2').replace(/(\d)¢/g,'$1 cents')}
 function speak(t){try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(speakable(t));u.rate=.9;u.pitch=1.1;speechSynthesis.speak(u)}catch(e){}}
 
 /* ---------- navigation ---------- */
@@ -385,7 +554,7 @@ function renderAdd(){
 }
 $('#addForm').addEventListener('submit',e=>{
   e.preventDefault();const name=$('#pname').value.trim();if(!name)return;
-  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{}};
+  const p={id:Date.now().toString(36),name,color:addColor,read:$('#pread').checked,stars:0,sk:{},v:2};
   const start=SK.findIndex(s=>s.g===addGrade);for(let i=0;i<start;i++)st(p,SK[i].id).m=true;
   DB.players.push(p);save();P=p;go('map');
 });
@@ -405,31 +574,41 @@ function renderMap(){
     row.innerHTML=`<div class="g">${g==='K'?'K':l}<small>${g==='K'?'start':'grade'}</small></div><div class="chips">${sk.map(([s,i])=>`<span class="chip ${st(P,s.id).m?'done':i===fi?'cur':''}" ${i===fi?'id="curChip"':''}>${s.n}</span>`).join('')}</div>`;
     m.appendChild(row);
   });
+  const rank=fi>=0?GR[SK[fi].g]:7,mods=$('#mods');mods.innerHTML='';
+  MODULES.forEach(M=>{
+    const b=document.createElement('button');b.className='mod';
+    if(M.id==='grid'){b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>Push a button, see the answer</small>`;b.onclick=()=>go('grid')}
+    else{const mc=masteredCount(P,M.pool),mf=frontier(P,M.pool),ready=mf>=0&&GR[SK[mf].g]<=rank;
+      if(ready)b.classList.add('ready');
+      b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>${mf>=0?'Next: '+esc(SK[mf].n):'All mastered!'}</small><span class="mb" aria-label="${mc} of ${M.pool.length} done"><i style="width:${mc/M.pool.length*100}%"></i></span>${ready?'<span class="tag">Ready for you</span>':''}`;
+      b.onclick=()=>startRound(M.pool,M.n)}
+    mods.appendChild(b);
+  });
 }
-$('#playBtn').onclick=()=>startRound();
-$('#gridBtn').onclick=()=>go('grid');
+$('#playBtn').onclick=()=>startRound(ALL,'Climb');
 
 /* ---------- play ---------- */
 const ROUND=10;let R=null;
-function startRound(){R={i:0,res:[],stars:0,ups:[]};go('play');next()}
+function startRound(pool,name){R={i:0,res:[],stars:0,ups:[],pool:pool||ALL,name:name||'Climb'};go('play');next()}
 function next(){
   if(R.i>=ROUND)return endRound();
-  const si=chooseSkill(P);const q=SK[si].f();R.cur={si,q,t0:performance.now(),done:false};
+  const si=chooseSkill(P,R.pool);const q=SK[si].f();R.cur={si,q,t0:performance.now(),done:false};
   const pg=$('#prog');pg.innerHTML='';for(let k=0;k<ROUND;k++){const d=document.createElement('i');if(k<R.res.length)d.className=R.res[k]?'ok':'no';else if(k===R.i)d.className='on';pg.appendChild(d)}
-  $('#skName').textContent=SK[si].n;const qt=$('#qText');qt.textContent=q.q;qt.className='q'+(q.q.length>14?' long':'');
+  $('#skName').textContent=SK[si].n;const qt=$('#qText');qt.textContent=q.q;qt.className='q'+(q.q.length>24?' story':q.q.length>14?' long':'');
   $('#qVis').innerHTML=q.vis||'';$('#fb').innerHTML='';
   const an=$('#answers');an.innerHTML='';an.style.gridTemplateColumns=q.opts.length===3?'1fr 1fr 1fr':'1fr 1fr';
-  q.opts.forEach(o=>{const b=document.createElement('button');b.className='ans';b.textContent=o;b.onclick=()=>answer(b,o);an.appendChild(b)});
+  q.opts.forEach(o=>{const b=document.createElement('button');b.className='ans';b.dataset.v=o;if(q.oh&&q.oh[o])b.innerHTML=q.oh[o];else b.textContent=o;b.setAttribute('aria-label',(q.lab&&q.lab[o])||o);b.onclick=()=>answer(b,o);an.appendChild(b)});
   if(P.read)speak(q.say||q.q);
 }
 function answer(btn,o){
   const c=R.cur;if(c.done)return;c.done=true;const ok=o===c.q.a;const ms=performance.now()-c.t0;
-  document.querySelectorAll('.ans').forEach(b=>{b.disabled=true;if(b.textContent===c.q.a&&ok)b.classList.add('right')});
-  const ev=record(P,c.si,ok,ms);if(ev)R.ups.push(ev);R.res.push(ok);R.i++;
+  document.querySelectorAll('.ans').forEach(b=>{b.disabled=true;if(b.dataset.v===c.q.a&&ok)b.classList.add('right')});
+  const ev=record(P,c.si,ok,ms,R.pool);if(ev)R.ups.push(ev);R.res.push(ok);R.i++;
+  const spoken=(c.q.lab&&c.q.lab[c.q.a])||c.q.a;
   if(ok){R.stars++;$('#fb').innerHTML=`<span class="yay">${pick(['Yes!','Nice!','You got it!','Great job!','Awesome!'])}</span>`;setTimeout(()=>ev?celebrate(ev,next):next(),800)}
-  else{btn.classList.add('wrong');document.querySelectorAll('.ans').forEach(b=>{if(b.textContent===c.q.a)b.classList.add('right')});
-    $('#fb').innerHTML=`<p>It's ${esc(c.q.a)}.</p><button class="btn" id="nextBtn">Next</button>`;$('#nextBtn').onclick=()=>next();
-    if(P.read)speak(`It's ${c.q.a}`);}
+  else{btn.classList.add('wrong');document.querySelectorAll('.ans').forEach(b=>{if(b.dataset.v===c.q.a)b.classList.add('right')});
+    $('#fb').innerHTML=`<p>${c.q.oh?'It\'s the green one.':'It\'s '+esc(c.q.a)+'.'}</p><button class="btn" id="nextBtn">Next</button>`;$('#nextBtn').onclick=()=>next();
+    if(P.read)speak(`It's ${spoken}`);}
 }
 function celebrate(ev,then){
   $('#overBox').innerHTML=`<svg class="bigstar" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><h2>New skill!</h2><p>You mastered <b>${esc(ev.up)}</b>.</p>${ev.next?`<p>Next climb: <b>${esc(ev.next)}</b></p>`:'<p>You reached the summit!</p>'}<button class="btn" id="overOk">Keep going</button>`;
@@ -437,7 +616,7 @@ function celebrate(ev,then){
 }
 function endRound(){
   const ok=R.res.filter(Boolean).length;
-  $('#overBox').innerHTML=`<svg class="bigstar" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><h2>${ok} stars!</h2><p>${ok>=8?'Super climbing.':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p><div class="toolrow" style="margin:0"><button class="btn" id="againBtn">Play again</button><button class="btn ghost" id="mapBtn">See my climb</button></div>`;
+  $('#overBox').innerHTML=`<svg class="bigstar" viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><h2>${ok} stars!</h2><p>${ok>=8?'Super climbing.':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p><div class="toolrow" style="margin:0"><button class="btn" id="againBtn">Play again</button><button class="btn ghost" id="mapBtn">Back to games</button></div>`;
   $('#over').hidden=false;if(P.read)speak(`${ok} stars!`);
   $('#againBtn').onclick=()=>{$('#over').hidden=true;startRound()};$('#mapBtn').onclick=()=>{$('#over').hidden=true;go('map')};
 }
