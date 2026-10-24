@@ -753,8 +753,8 @@ function endRound(){
     <p>${ok>=8?'Super work!':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p>
     ${R.ups.length?`<p>New skill${R.ups.length>1?'s':''}: <b>${R.ups.map(esc).join(', ')}</b></p>`:''}
     <div class="mprog"><b>${esc(R.name)}</b><div class="bar"><i style="width:${mc/pool.length*100}%"></i></div><small>${mc} of ${pool.length} skills learned</small>${meter}</div>
-    <div class="toolrow" style="margin:0"><button class="btn big pulse" id="againBtn">Play again</button><button class="btn ghost" id="mapBtn">Back</button></div>`;
-  $('#over').hidden=false;if(P.read)speak(`You got ${ok} star${ok===1?'':'s'}! Tap Play again to keep going.`,'cheer');
+    <div class="toolrow" style="margin:0"><button class="btn big pulse" id="againBtn">Keep going →</button><button class="btn ghost" id="mapBtn">Done</button></div>`;
+  $('#over').hidden=false;if(P.read)speak(`You got ${ok} star${ok===1?'':'s'}! Tap Keep going for more!`,'cheer');
   $('#againBtn').onclick=()=>{$('#over').hidden=true;startRound(R.pool,R.name)};$('#mapBtn').onclick=()=>{$('#over').hidden=true;go('map')};
 }
 $('#quitBtn').onclick=()=>{clearTimers();try{speechSynthesis.cancel()}catch(e){}$('#over').hidden=true;go('map')};
