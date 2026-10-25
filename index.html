@@ -807,7 +807,7 @@ function speak(t,mood='q',done){try{if(!('speechSynthesis' in window)){done&&don
   const u=new SpeechSynthesisUtterance(speakable(t));if(VOICE){u.voice=VOICE;u.lang=VOICE.lang}
   const natural=VOICE&&/Natural|Neural|Premium|Enhanced/i.test(VOICE.name);const [rt,pt]=MOOD[mood]||MOOD.q;
   u.rate=rt;u.pitch=natural?1+(pt-1)/2:pt; /* natural voices already have expression; nudge them less */
-  if(done)u.onend=done;setTimeout(()=>speechSynthesis.speak(u),60);}catch(e){done&&done()}}
+  if(done)u.onend=done;speechSynthesis.speak(u);}catch(e){done&&done()}} /* speak right away: Safari only allows sound tied to a tap */
 function renderVoicePicker(){
   const sel=$('#voiceSel');if(!sel)return;const L=voiceList();
   sel.innerHTML='<option value="">Best available</option>'+L.map(v=>`<option value="${esc(v.name)}" ${DB.voice===v.name?'selected':''}>${esc(v.name)}</option>`).join('');
@@ -911,6 +911,13 @@ const ANIMALS=[['🐶','Puppy'],['🐱','Kitty'],['🐰','Bunny'],['🦊','Fox']
 const BUDDIES=ANIMALS.slice(0,12);
 const animalName=e=>(ANIMALS.find(a=>a[0]===e)||['',''])[1];
 let AC=null;
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){} /* play chimes like a game, not silenced as page sound */
+/* Safari: turn sound on during the very first tap, then it stays on */
+let unlocked=false;
+function unlockAudio(){if(unlocked)return;unlocked=true;
+  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
+  try{const a=ac();if(a){const b=a.createBuffer(1,1,22050),src=a.createBufferSource();src.buffer=b;src.connect(a.destination);src.start(0)}}catch(e){}}
+['touchend','pointerdown','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 function ac(){if(DB.sound===false)return null;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
 function tone(f,t0,d,type='triangle',v=.14){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.05)}
 const SFX={ok:()=>{tone(784,0,.16);tone(1175,.09,.28)},no:()=>tone(233,0,.3,'sine',.1),fan:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.1,.4)),streak:()=>[659,880,1175].forEach((f,i)=>tone(f,i*.07,.22)),stick:()=>[1047,1568,2093].forEach((f,i)=>tone(f,i*.08,.25,'sine',.09))};
