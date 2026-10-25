@@ -225,6 +225,45 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .pgk{grid-column:1/-1;color:var(--muted);font-weight:700;font-size:.9rem;display:flex;gap:6px;align-items:center}.pgk .dot{width:16px;height:16px}
 .cw{display:grid;justify-items:center;gap:3px}.cw small{font-size:.74rem;font-weight:700;color:var(--muted)}
 .ans .cw small{display:none}.ans .coin{transform:scale(1.35)}
+/* Fun layer */
+#fx{position:fixed;inset:0;pointer-events:none;z-index:40;overflow:hidden}
+.cf{position:absolute;width:10px;height:14px;border-radius:3px}
+#buddy{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:15;display:flex;align-items:flex-end;gap:6px;pointer-events:none}
+#buddy .face{font-size:64px;line-height:1;display:inline-block}
+#buddy .bub{background:var(--card);border:2px solid var(--line);border-radius:16px 16px 4px 16px;padding:8px 12px;font-weight:700;font-size:1.05rem;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;max-width:180px;margin-bottom:40px}
+#buddy.talk .bub{opacity:1;transform:none}
+.hop{animation:hop .6s ease}@keyframes hop{30%{transform:translateY(-22px) rotate(-10deg)}60%{transform:translateY(0) rotate(8deg)}}
+.droop{animation:droop .8s ease}@keyframes droop{40%{transform:rotate(-14deg) translateY(6px)}}
+.bud{font-size:72px;line-height:1}.dance{animation:dance 1s ease-in-out infinite;display:inline-block}
+@keyframes dance{25%{transform:rotate(-10deg) translateY(-8px)}75%{transform:rotate(10deg) translateY(-8px)}}
+#streak{position:fixed;top:calc(84px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-16px) scale(.9);opacity:0;background:var(--star);color:#3a2a00;font-family:var(--display);font-weight:800;font-size:1.7rem;padding:8px 22px;border-radius:99px;z-index:30;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+#streak.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.ans.popok{animation:popok .45s ease}@keyframes popok{40%{transform:scale(1.08)}}
+.ans.still{animation:none}
+.prog .pd{flex:1;height:14px;border-radius:99px;border:0;padding:0;cursor:pointer;background:var(--line)}
+.prog .pd.ok{background:var(--good)}.prog .pd.no{background:var(--bad)}
+.prog .pd:active{transform:scaleY(1.4)}
+.rv{width:100%;margin-top:4px}.rv .ans{min-height:70px}.rvnote{font-weight:700}.rvnote.good{color:var(--good)}
+.lookback{width:100%;display:grid;gap:6px}.lookback small{color:var(--muted);font-weight:700}
+.lbrow{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.lb{aspect-ratio:1;border-radius:10px;font-weight:800;font-family:var(--display);color:#fff;min-width:0;padding:0;font-size:.95rem}
+.lb.ok{background:var(--good)}.lb.no{background:var(--bad)}
+.newstick{display:grid;justify-items:center;gap:6px}.newstick .sticker{font-size:64px;line-height:1;display:inline-block;animation:flipin .8s ease-out}
+.newstick b{font-family:var(--display);font-size:1.3rem}
+@keyframes flipin{0%{transform:rotateY(90deg) scale(.4)}70%{transform:rotateY(-10deg) scale(1.15)}100%{transform:none}}
+.budgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.budpick{display:grid;justify-items:center;gap:2px;padding:8px 0;border-radius:16px;background:var(--paper);border:2px solid var(--line)}
+.budpick span{font-size:44px;line-height:1.1}.budpick small{font-weight:700;color:var(--muted);font-size:.78rem}
+.budpick:active{transform:scale(.94)}
+.sbook{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%}
+.stk{aspect-ratio:1;border-radius:12px;background:var(--paper);display:grid;place-items:center;font-size:32px;border:2px solid var(--line);padding:0}
+.stk.no{font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--line);border-style:dashed}
+.stk.wig{animation:hop .6s ease}
+.stickbtn{display:flex;align-items:center;gap:4px;font-family:var(--display);font-weight:700;font-size:1.2rem;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:6px 10px}
+.stickbtn span:first-child{font-size:1.4rem}
+.avatar.hasbud{font-size:2.2rem!important}
+#mAv{cursor:pointer}
+.budbig{font-size:84px;line-height:1;animation:hop 1.2s ease 1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -250,6 +289,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <label for="voiceSel" style="font-weight:700">Reading voice</label>
       <div class="vrow"><select id="voiceSel"></select><button class="btn ghost" id="voiceTest" type="button">Test</button></div>
       <p class="hint" id="voiceNote"></p>
+      <label class="check"><input type="checkbox" id="sndChk"> Sound effects (chimes and fanfares)</label>
       <p class="hint">On iPad, a more natural voice is free: Settings, Accessibility, Spoken Content, Voices, English. Download an "Enhanced" or "Premium" voice, then pick it here.</p>
     </div>
   </section>
@@ -275,9 +315,11 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <div class="avatar" id="mAv" style="width:46px;height:46px;font-size:1.4rem"></div>
       <h2 id="mName" style="font-size:1.8rem"></h2>
       <span class="sp"></span>
+      <button class="stickbtn" id="stickBtn" aria-label="My stickers"><span id="stickIco">🐾</span><span id="stickN">0</span></button>
       <span class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg><span id="mStars">0</span></span>
     </div>
     <div class="kid" id="kidTop" hidden>
+      <button class="budbig" id="kidBuddy" aria-label="Change buddy"></button>
       <p class="hi" id="kidHi"></p>
       <button class="bigplay" id="kidPlay" aria-label="Play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15a1 1 0 001.5.9l12-7.5a1 1 0 000-1.8l-12-7.5A1 1 0 007 4.5z"/></svg><span>Play</span></button>
       <p class="pickg">or pick a game</p>
@@ -324,6 +366,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 </div>
 
 <div class="over" id="over" hidden><div class="box" id="overBox"></div></div>
+<div id="fx" aria-hidden="true"></div>
+<div id="buddy" hidden aria-live="polite"><span class="bub" id="budBub"></span><span class="face" id="budFace"></span></div>
+<div id="streak" aria-hidden="true"></div>
 
 <script>
 (function(){
@@ -771,7 +816,7 @@ function renderVoicePicker(){
 
 /* ---------- navigation ---------- */
 const SECTIONS=['home','add','map','play','grid'];
-function go(id){SECTIONS.forEach(s=>$('#'+s).hidden=s!==id);window.scrollTo(0,0);if(id==='home')renderHome();if(id==='map')renderMap();if(id==='add')renderAdd();if(id==='grid')renderGrid()}
+function go(id){SECTIONS.forEach(s=>$('#'+s).hidden=s!==id);$('#buddy').hidden=id!=='play'||!(P&&P.buddy);window.scrollTo(0,0);if(id==='home')renderHome();if(id==='map')renderMap();if(id==='add')renderAdd();if(id==='grid')renderGrid()}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 function setColor(c){document.documentElement.style.setProperty('--pc',c||COLORS[0]);document.documentElement.style.setProperty('--pcsoft',`color-mix(in srgb, ${c||COLORS[0]} 16%, var(--card))`)}
 
@@ -782,16 +827,17 @@ function renderHome(){
   $('#emptyNote').hidden=DB.players.length>0;
   DB.players.forEach(p=>{
     const fi=frontier(p);const b=document.createElement('button');b.className='pcard';
-    b.innerHTML=`<span class="avatar" style="background:${p.color}">${esc(p.name[0]||'?').toUpperCase()}</span><span class="meta"><h2>${esc(p.name)}</h2><small>${fi>=0?'Climbing: '+SK[fi].n:'Reached the summit'}</small><small>${masteredCount(p)} of ${SK.length} skills</small></span>${editing?'<span class="del">Remove</span>':''}`;
+    b.innerHTML=`<span class="avatar${p.buddy?' hasbud':''}" style="background:${p.buddy?`color-mix(in srgb, ${p.color} 25%, var(--card))`:p.color}">${p.buddy||esc(p.name[0]||'?').toUpperCase()}</span><span class="meta"><h2>${esc(p.name)}</h2><small>${fi>=0?'Climbing: '+SK[fi].n:'Reached the summit'}</small><small>${masteredCount(p)} of ${SK.length} skills</small></span>${editing?'<span class="del">Remove</span>':''}`;
     b.onclick=()=>{if(editing){pendingDel=p.id;$('#confirmText').textContent=`Remove ${p.name} and all their progress?`;$('#confirmDel').hidden=false}else{P=p;go('map')}};
     box.appendChild(b);
   });
   const a=document.createElement('button');a.className='pcard add';a.textContent='+ Add player';a.onclick=()=>go('add');box.appendChild(a);
   $('#editBtn').textContent=editing?'Done editing':'Edit players';$('#editBtn').hidden=!DB.players.length;
-  renderVoicePicker();
+  renderVoicePicker();$('#sndChk').checked=DB.sound!==false;
 }
 $('#editBtn').onclick=()=>{editing=!editing;$('#confirmDel').hidden=true;renderHome()};
 $('#voiceSel').onchange=e=>{DB.voice=e.target.value||null;save();loadVoice();speak("Hi! Let's do some math. What is 3 plus 4?")};
+$('#sndChk').onchange=e=>{DB.sound=e.target.checked;save();if(DB.sound)sfx('ok')};
 $('#voiceTest').onclick=()=>speak("Hi! Let's do some math. What is 3 plus 4?");
 $('#confirmNo').onclick=()=>{$('#confirmDel').hidden=true;pendingDel=null};
 $('#confirmYes').onclick=()=>{DB.players=DB.players.filter(p=>p.id!==pendingDel);save();$('#confirmDel').hidden=true;editing=false;renderHome()};
@@ -813,9 +859,9 @@ $('#addForm').addEventListener('submit',e=>{
 });
 
 /* ---------- map ---------- */
-function renderMap(){
+function renderMap(quiet){
   if(!P)return go('home');setColor(P.color);
-  $('#mAv').style.background=P.color;$('#mAv').textContent=(P.name[0]||'?').toUpperCase();$('#mName').textContent=P.name;$('#mStars').textContent=P.stars||0;
+  $('#mAv').style.background=P.buddy?`color-mix(in srgb, ${P.color} 25%, var(--card))`:P.color;$('#mAv').textContent=(P.name[0]||'?').toUpperCase();$('#mName').textContent=P.name;$('#mStars').textContent=P.stars||0;
   const fi=frontier(P),mc=masteredCount(P);
   $('#mNow').textContent=fi>=0?SK[fi].n:'You reached the summit!';
   $('#mBar').style.width=(mc/SK.length*100)+'%';
@@ -831,7 +877,9 @@ function renderMap(){
   /* Kid mode (K and 1st): one giant Play button, a few big game tiles at their level, no map. */
   $('#kidTop').hidden=!kid;$('#hero').hidden=kid;$('#gamesH').hidden=kid;$('#mountWrap').hidden=kid;$('#allBtn').hidden=!kid;
   mods.classList.toggle('kidmods',kid);
-  $('#kidHi').textContent=`Hi, ${P.name}!`;
+  $('#kidHi').textContent=`Hi, ${P.name}!`;$('#kidBuddy').textContent=P.buddy||'';$('#kidBuddy').hidden=!P.buddy;
+  $('#stickN').textContent=(P.stickers||[]).length;$('#stickIco').textContent=(P.stickers&&P.stickers.at(-1))||'🐾';
+  $('#mAv').textContent=P.buddy||(P.name[0]||'?').toUpperCase();$('#mAv').classList.toggle('hasbud',!!P.buddy);
   MODULES.filter(M=>!kid||(M.id!=='grid'&&GR[SK[M.pool[0]].g]<=rank)).forEach(M=>{
     const b=document.createElement('button');b.className='mod';
     if(M.id==='grid'){b.innerHTML=`<span class="mt"><span class="gl">${M.gl}</span><span class="gr">${M.gr}</span></span><h3>${M.n}</h3><small>Push a button, see the answer</small>`;b.onclick=()=>go('grid')}
@@ -841,8 +889,12 @@ function renderMap(){
       b.onclick=()=>startRound(M.pool,M.n)}
     mods.appendChild(b);
   });
-  if(kid&&P.read)speak(`Hi ${P.name}! Tap Play. Or pick a game.`,'cheer');
+  if(!P.buddy){pickBuddy(()=>renderMap(true));return}
+  if(kid&&P.read&&!quiet)speak(`Hi ${P.name}! Tap Play. Or pick a game.`,'cheer');
 }
+$('#stickBtn').onclick=()=>stickerBook();
+$('#kidBuddy').onclick=()=>pickBuddy(()=>renderMap(true));
+$('#mAv').onclick=()=>pickBuddy(()=>renderMap(true));
 function climbRank(p){const fi=frontier(p);return fi>=0?GR[SK[fi].g]:9}
 let showAll=false;
 function isKid(p){return !showAll&&climbRank(p)<=1}
@@ -850,6 +902,48 @@ $('#playBtn').onclick=()=>startRound(ALL,'Climb');
 $('#kidPlay').onclick=()=>startRound(ALL,'Climb');
 $('#allBtn').onclick=()=>{showAll=true;renderMap()};
 document.querySelector('[data-go="home"][aria-label="Switch player"]').addEventListener('click',()=>{showAll=false});
+
+/* ---------- fun: animals, stickers, sounds, confetti ---------- */
+const ANIMALS=[['🐶','Puppy'],['🐱','Kitty'],['🐰','Bunny'],['🦊','Fox'],['🐻','Bear'],['🐼','Panda'],['🐨','Koala'],['🐯','Tiger'],['🦁','Lion'],['🦄','Unicorn'],['🐧','Penguin'],['🦖','T. rex'],
+ ['🐮','Cow'],['🐷','Pig'],['🐸','Frog'],['🐵','Monkey'],['🐔','Chicken'],['🦉','Owl'],['🐝','Bee'],['🦋','Butterfly'],['🐢','Turtle'],['🐙','Octopus'],['🐬','Dolphin'],['🐳','Whale'],
+ ['🦈','Shark'],['🐠','Fish'],['🦀','Crab'],['🦒','Giraffe'],['🦓','Zebra'],['🐘','Elephant'],['🦛','Hippo'],['🦏','Rhino'],['🐊','Crocodile'],['🦕','Dinosaur'],['🦔','Hedgehog'],['🦦','Otter'],
+ ['🦥','Sloth'],['🦩','Flamingo'],['🐞','Ladybug'],['🦜','Parrot'],['🐿️','Squirrel'],['🦘','Kangaroo']];
+const BUDDIES=ANIMALS.slice(0,12);
+const animalName=e=>(ANIMALS.find(a=>a[0]===e)||['',''])[1];
+let AC=null;
+function ac(){if(DB.sound===false)return null;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function tone(f,t0,d,type='triangle',v=.14){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.05)}
+const SFX={ok:()=>{tone(784,0,.16);tone(1175,.09,.28)},no:()=>tone(233,0,.3,'sine',.1),fan:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.1,.4)),streak:()=>[659,880,1175].forEach((f,i)=>tone(f,i*.07,.22)),stick:()=>[1047,1568,2093].forEach((f,i)=>tone(f,i*.08,.25,'sine',.09))};
+function sfx(k){try{SFX[k]()}catch(e){}}
+const calm=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function confetti(x,y,n=22,power=1){
+  if(calm())return;const fx=$('#fx'),cols=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--pc)','var(--star)'];
+  for(let i=0;i<n;i++){const e=document.createElement('i');e.className='cf';e.style.left=x+'px';e.style.top=y+'px';e.style.background=pick(cols);if(Math.random()<.3)e.style.borderRadius='50%';fx.appendChild(e);
+    const a=Math.random()*Math.PI*2,v=(90+Math.random()*200)*power,dx=Math.cos(a)*v,dy=Math.sin(a)*v-160*power;
+    try{e.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:`translate(${dx}px,${dy+420}px) rotate(${r(180,720)}deg)`,opacity:0}],{duration:1100+Math.random()*700,easing:'cubic-bezier(.2,.7,.4,1)'}).onfinish=()=>e.remove()}catch(err){e.remove()}}
+}
+const bigConfetti=()=>{confetti(innerWidth*.3,innerHeight*.35,45,1.5);confetti(innerWidth*.7,innerHeight*.35,45,1.5)};
+let budT=0;
+function buddySay(text,mood){
+  const b=$('#buddy');if(!P||!P.buddy){b.hidden=true;return}
+  b.hidden=$('#play').hidden;$('#budFace').textContent=P.buddy;$('#budBub').textContent=text||'';
+  const f=$('#budFace');f.classList.remove('hop','droop');void f.offsetWidth;if(mood)f.classList.add(mood);
+  b.classList.toggle('talk',!!text);clearTimeout(budT);budT=setTimeout(()=>b.classList.remove('talk'),2200);
+}
+function streakBanner(n){const s=$('#streak');s.textContent=`🔥 ${n} in a row!`;s.classList.add('show');sfx('streak');setTimeout(()=>s.classList.remove('show'),1600)}
+function pickBuddy(then){
+  $('#overBox').innerHTML=`<h2>Pick your buddy!</h2><p>Your buddy cheers you on.</p><div class="budgrid">${BUDDIES.map(([e,n])=>`<button class="budpick" data-e="${e}" aria-label="${n}"><span>${e}</span><small>${n}</small></button>`).join('')}</div>`;
+  $('#over').hidden=false;if(P.read)speak('Pick your buddy! Tap an animal.','cheer');
+  document.querySelectorAll('.budpick').forEach(b=>b.onclick=()=>{P.buddy=b.dataset.e;P.stickers=P.stickers||[];if(!P.stickers.includes(P.buddy))P.stickers.push(P.buddy);save();sfx('stick');
+    $('#over').hidden=true;if(P.read)speak(`Hi ${P.name}! I'm ${animalName(P.buddy)}. Let's do math!`,'cheer');confetti(innerWidth/2,innerHeight/2,30);then&&then()});
+}
+function awardStickers(n){P.stickers=P.stickers||[];const got=[];for(let k=0;k<n;k++){const left=ANIMALS.filter(a=>!P.stickers.includes(a[0]));if(!left.length)break;const a=pick(left);P.stickers.push(a[0]);got.push(a)}save();return got}
+function stickerBook(){
+  const have=P.stickers||[];
+  $('#overBox').innerHTML=`<h2>My stickers</h2><p>${have.length} of ${ANIMALS.length}. Finish a round to win a new one!</p><div class="sbook">${ANIMALS.map(([e,n])=>have.includes(e)?`<button class="stk" data-n="${n}" aria-label="${n}">${e}</button>`:`<span class="stk no" aria-label="not yet">?</span>`).join('')}</div><button class="btn big" id="sbClose">Done</button>`;
+  $('#over').hidden=false;document.querySelectorAll('.stk[data-n]').forEach(b=>b.onclick=()=>{speak(b.dataset.n,'cheer');b.classList.remove('wig');void b.offsetWidth;b.classList.add('wig')});
+  $('#sbClose').onclick=()=>{$('#over').hidden=true};
+}
 
 /* ---------- play ----------
    A round is 10 questions. A skill is mastered at 9 of its last 10 right.
@@ -860,50 +954,81 @@ const HAND=`<svg viewBox="0 0 64 64" class="hand" aria-hidden="true"><path d="M2
 const SPK=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>`;
 function clearTimers(){if(!R)return;clearTimeout(R.tNext);clearTimeout(R.tIdle)}
 function startRound(pool,name){clearTimers();pool=pool||ALL;name=name||'Climb';
-  R={i:0,res:[],ups:[],pool,name,review:frontier(P,pool)<0};
-  $('#roundName').textContent=name+(R.review&&name!=='Climb'?' · review':'');go('play');next()}
+  R={i:0,res:[],hist:[],ups:[],pool,name,streak:0,review:frontier(P,pool)<0};
+  $('#roundName').textContent=name+(R.review&&name!=='Climb'?' · review':'');go('play');
+  if(!P.buddy)return pickBuddy(next);next()}
+function drawProg(){
+  const pg=$('#prog');pg.innerHTML='';
+  for(let k=0;k<ROUND;k++){if(k<R.res.length){const b=document.createElement('button');b.className='pd '+(R.res[k]?'ok':'no');b.setAttribute('aria-label',`Look back at question ${k+1}`);b.onclick=()=>review(k);pg.appendChild(b)}else{const d=document.createElement('i');if(k===R.i)d.className='on';pg.appendChild(d)}}
+}
+function renderAnswers(box,q,onPick){
+  box.innerHTML='';box.style.gridTemplateColumns=q.opts.length===3?'1fr 1fr 1fr':'1fr 1fr';
+  q.opts.forEach(o=>{const b=document.createElement('button');b.className='ans';b.dataset.v=o;if(q.oh&&q.oh[o])b.innerHTML=q.oh[o];else b.textContent=o;b.setAttribute('aria-label',(q.lab&&q.lab[o])||o);if(onPick)b.onclick=()=>onPick(b,o);else b.disabled=true;box.appendChild(b)});
+}
 function next(){
   clearTimers();if(R.i>=ROUND)return endRound();
   const si=chooseSkill(P,R.pool);const q=SK[si].f();R.cur={si,q,t0:performance.now(),done:false};
-  const pg=$('#prog');pg.innerHTML='';for(let k=0;k<ROUND;k++){const d=document.createElement('i');if(k<R.res.length)d.className=R.res[k]?'ok':'no';else if(k===R.i)d.className='on';pg.appendChild(d)}
+  drawProg();
   $('#skName').textContent=SK[si].n;const qt=$('#qText');qt.textContent=q.q;qt.className='q'+(q.q.length>24?' story':q.q.length>14?' long':'');
   $('#qVis').innerHTML=q.vis||'';$('#fb').innerHTML='';
   const bigSpk=$('#qVis .cic.big');if(bigSpk){bigSpk.setAttribute('role','button');bigSpk.setAttribute('aria-label','Hear it again');bigSpk.style.cursor='pointer';bigSpk.onclick=()=>speak(q.say||q.q)}
-  const an=$('#answers');an.innerHTML='';an.classList.remove('nudge');an.style.gridTemplateColumns=q.opts.length===3?'1fr 1fr 1fr':'1fr 1fr';
-  q.opts.forEach(o=>{const b=document.createElement('button');b.className='ans';b.dataset.v=o;if(q.oh&&q.oh[o])b.innerHTML=q.oh[o];else b.textContent=o;b.setAttribute('aria-label',(q.lab&&q.lab[o])||o);b.onclick=()=>answer(b,o);an.appendChild(b)});
+  const an=$('#answers');an.classList.remove('nudge');renderAnswers(an,q,answer);
+  buddySay('');
   if(!P.coached)return coach();
   ask();
 }
 function ask(){
   if(P.read)speak(R.cur.q.say||R.cur.q.q);
   /* little ones who stall: after a while, read it again and wiggle the answers */
-  if(isKid(P))R.tIdle=setTimeout(()=>{if(R.cur.done)return;$('#answers').classList.add('nudge');if(P.read)speak((R.cur.q.say||R.cur.q.q)+' Tap an answer.')},14000);
+  if(isKid(P))R.tIdle=setTimeout(()=>{if(R.cur.done)return;$('#answers').classList.add('nudge');buddySay('Tap an answer!');if(P.read)speak((R.cur.q.say||R.cur.q.q)+' Tap an answer.')},14000);
 }
 function coach(){
   $('#overBox').innerHTML=`<h2>How to play</h2><div class="coachrow"><div class="cstep"><span class="cic">${SPK}</span><b>Listen</b></div><span class="carrow">→</span><div class="cstep"><span class="demo">5${HAND}</span><b>Tap the answer</b></div></div><p>Get it right and you earn a star.</p><button class="btn big pulse" id="coachOk">OK!</button>`;
   $('#over').hidden=false;if(P.read)speak('Listen to the question. Then tap the answer you think is right!','cheer');
   $('#coachOk').onclick=()=>{$('#over').hidden=true;P.coached=true;save();ask()};
 }
+const CHEERS=['Yes!','Nice!','You got it!','Great job!','Awesome!','Super!','Woo-hoo!','Wow!'];
 function answer(btn,o){
   const c=R.cur;if(c.done)return;c.done=true;clearTimers();$('#answers').classList.remove('nudge');
   const ok=o===c.q.a;const ms=performance.now()-c.t0;
-  document.querySelectorAll('.ans').forEach(b=>{b.disabled=true;if(b.dataset.v===c.q.a&&ok)b.classList.add('right')});
+  document.querySelectorAll('#answers .ans').forEach(b=>{b.disabled=true;if(b.dataset.v===c.q.a&&ok)b.classList.add('right')});
   const wasDone=frontier(P,R.pool)<0;
-  const ev=record(P,c.si,ok,ms,R.pool);if(ev)R.ups.push(ev.up);R.res.push(ok);R.i++;
+  const ev=record(P,c.si,ok,ms,R.pool);if(ev)R.ups.push(ev.up);R.res.push(ok);R.hist.push({q:c.q,si:c.si,pick:o,ok});R.i++;drawProg();
   const finished=!wasDone&&frontier(P,R.pool)<0;if(finished)R.finished=true;
   const spoken=(c.q.lab&&c.q.lab[c.q.a])||c.q.a;
-  const after=()=>finished?finishGame(next):ev?celebrate(ev,next):next();
-  if(ok){const w=pick(['Yes!','Nice!','You got it!','Great job!','Awesome!','Super!']);$('#fb').innerHTML=`<span class="yay">${w}</span>`;
-    if(P.read)speak(w,'cheer');R.tNext=setTimeout(after,1300)}
-  else{btn.classList.add('wrong');document.querySelectorAll('.ans').forEach(b=>{if(b.dataset.v===c.q.a)b.classList.add('right')});
+  R.after=()=>finished?finishGame(next):ev?celebrate(ev,next):next();
+  if(ok){
+    R.streak++;const rc=btn.getBoundingClientRect();confetti(rc.left+rc.width/2,rc.top+rc.height/2,18);sfx('ok');btn.classList.add('popok');
+    const milestone=[3,5,7,10].includes(R.streak);const w=pick(CHEERS);
+    $('#fb').innerHTML=`<span class="yay">${milestone?R.streak+' in a row!':w}</span>`;buddySay(milestone?`${R.streak} in a row!`:w,'hop');
+    if(milestone)streakBanner(R.streak);
+    if(P.read)speak(milestone?`${R.streak} in a row!`:w,'cheer');R.tNext=setTimeout(R.after,milestone?1700:1300)}
+  else{R.streak=0;sfx('no');btn.classList.add('wrong');document.querySelectorAll('#answers .ans').forEach(b=>{if(b.dataset.v===c.q.a)b.classList.add('right')});
+    buddySay(pick(['Almost!','Good try!','You can do it!','Let\'s look!']),'droop');
     $('#fb').innerHTML=`<p>${c.q.oh?'It\'s the green one.':'It\'s '+esc(c.q.a)+'.'}</p><button class="btn" id="nextBtn">Next</button>`;
-    const go2=()=>{clearTimers();after()};$('#nextBtn').onclick=go2;
+    const go2=()=>{clearTimers();R.after()};$('#nextBtn').onclick=go2;
     /* move on by itself so a 5-year-old is never stuck; Next skips the wait */
     R.tNext=setTimeout(go2,4200);if(P.read)speak(`Good try. It's ${spoken}.`,'calm');}
 }
+/* Look back at any finished question in this round: same picture, their pick in red or green, the right answer, and Hear it. */
+function review(k,back){
+  const h=R.hist[k];if(!h)return;clearTimers();const q=h.q;
+  const lab=v=>(q.lab&&q.lab[v])||v;
+  $('#overBox').innerHTML=`<span class="skillname">Question ${k+1} · ${esc(SK[h.si].n)}</span><div class="q${q.q.length>24?' story':' long'}">${esc(q.q)}</div><div class="vis">${q.vis||''}</div><div class="answers rv" id="rvAns"></div>
+    <p class="rvnote ${h.ok?'good':''}">${h.ok?'You got this one right!':`You picked ${q.oh?'the red one':'<b>'+esc(h.pick)+'</b>'}. The answer is ${q.oh?'the green one':'<b>'+esc(q.a)+'</b>'}.`}</p>
+    <div class="toolrow" style="margin:0"><button class="btn ghost" id="rvSay">Hear it</button><button class="btn big" id="rvBack">${back?'Back':'Back to the game'}</button></div>`;
+  renderAnswers($('#rvAns'),q,null);
+  document.querySelectorAll('#rvAns .ans').forEach(b=>{if(b.dataset.v===q.a)b.classList.add('right');else if(b.dataset.v===h.pick)b.classList.add('wrong','still')});
+  $('#over').hidden=false;
+  $('#rvSay').onclick=()=>speak(`${q.say||q.q} The answer is ${lab(q.a)}.`);
+  $('#rvBack').onclick=()=>{$('#over').hidden=true;if(back)return back();
+    /* pick the game back up where it paused */
+    if(R.cur&&R.cur.done&&!$('#nextBtn'))R.tNext=setTimeout(R.after,500);
+    else if(R.cur&&!R.cur.done&&isKid(P))R.tIdle=setTimeout(()=>{if(!R.cur.done)$('#answers').classList.add('nudge')},14000)};
+}
 function celebrate(ev,then){
-  $('#overBox').innerHTML=`${STARSVG('bigstar')}<h2>New skill!</h2><p>You learned <b>${esc(ev.up)}</b>.</p>${ev.next?`<p>Next up: <b>${esc(ev.next)}</b></p>`:''}<button class="btn big pulse" id="overOk">Keep going</button>`;
-  $('#over').hidden=false;if(P.read)speak(`New skill! You learned ${ev.up}!`,'cheer');$('#overOk').onclick=()=>{$('#over').hidden=true;then()};
+  $('#overBox').innerHTML=`${P.buddy?`<div class="bud dance">${P.buddy}</div>`:STARSVG('bigstar')}<h2>New skill!</h2><p>You learned <b>${esc(ev.up)}</b>.</p>${ev.next?`<p>Next up: <b>${esc(ev.next)}</b></p>`:''}<button class="btn big pulse" id="overOk">Keep going</button>`;
+  $('#over').hidden=false;sfx('fan');bigConfetti();if(P.read)speak(`New skill! You learned ${ev.up}!`,'cheer');$('#overOk').onclick=()=>{$('#over').hidden=true;then()};
 }
 function nextGame(){const rank=climbRank(P);return MODULES.find(M=>M.id!=='grid'&&M.n!==R.name&&frontier(P,M.pool)>=0&&GR[SK[frontier(P,M.pool)].g]<=rank)}
 function finishGame(then){
@@ -911,20 +1036,26 @@ function finishGame(then){
   $('#overBox').innerHTML=`<svg viewBox="0 0 64 64" class="trophyart" aria-hidden="true"><path d="M18 8h28v14a14 14 0 01-28 0z" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/><path d="M18 12H9a9 9 0 009 12M46 12h9a9 9 0 01-9 12" style="fill:none;stroke:var(--ink)" stroke-width="3"/><path d="M28 36h8v10h-8z" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/><rect x="20" y="46" width="24" height="9" rx="2" style="fill:var(--star);stroke:var(--ink)" stroke-width="3"/></svg>
     <h2>${climb?'You reached the top!':'You finished '+esc(R.name)+'!'}</h2><p>${climb?'Every skill on the mountain. Amazing.':'You learned every skill in this game.'}</p>
     <div class="toolrow" style="margin:0">${ng?`<button class="btn big pulse" id="ngBtn">Try ${esc(ng.n)}</button>`:''}<button class="btn ghost" id="keepBtn">Keep playing</button></div>`;
-  $('#over').hidden=false;if(P.read)speak(climb?'You reached the top of the mountain!':`You finished ${R.name}! ${ng?'Next, try '+ng.n+'.':''}`,'cheer');
+  $('#over').hidden=false;sfx('fan');bigConfetti();setTimeout(bigConfetti,700);if(P.read)speak(climb?'You reached the top of the mountain!':`You finished ${R.name}! ${ng?'Next, try '+ng.n+'.':''}`,'cheer');
   if(ng)$('#ngBtn').onclick=()=>{$('#over').hidden=true;startRound(ng.pool,ng.n)};
   $('#keepBtn').onclick=()=>{$('#over').hidden=true;then()};
 }
-function endRound(){
-  clearTimers();const ok=R.res.filter(Boolean).length,pool=R.pool,mc=masteredCount(P,pool),mf=frontier(P,pool);
+function endRound(quiet){
+  clearTimers();buddySay('');const ok=R.res.filter(Boolean).length,pool=R.pool,mc=masteredCount(P,pool),mf=frontier(P,pool);
+  if(!R.ended){R.ended=true;R.got=awardStickers(ok===ROUND?2:1)}
   const hist=mf>=0?st(P,SK[mf].id).h:[];const right=sum(hist.slice(-10));
   const meter=mf>=0?`<div class="meter" aria-label="${right} of last 10 right">${[...Array(10)].map((_,k)=>{const v=hist.slice(-10)[k];return `<i class="${v===1?'ok':v===0?'no':''}"></i>`}).join('')}</div><small>Working on <b>${esc(SK[mf].n)}</b>. Get 9 of 10 right to learn it.</small>`:'<small>Everything here is learned. These rounds keep it sharp.</small>';
-  $('#overBox').innerHTML=`<h2>${ok} star${ok===1?'':'s'}!</h2><div class="starrow">${R.res.map(x=>STARSVG(x?'on':'off')).join('')}</div>
-    <p>${ok>=8?'Super work!':ok>=5?'Good work. Your brain is growing.':'Tricky ones help you learn.'}</p>
+  const stick=R.got.length?`<div class="newstick">${R.got.map(([e])=>`<span class="sticker">${e}</span>`).join('')}<b>New sticker${R.got.length>1?'s':''}: ${R.got.map(a=>a[1]).join(' and ')}!</b></div>`:'';
+  $('#overBox').innerHTML=`${P.buddy?`<div class="bud dance">${P.buddy}</div>`:''}<h2>${ok===ROUND?'Perfect round!':ok+' star'+(ok===1?'':'s')+'!'}</h2><div class="starrow">${R.res.map(x=>STARSVG(x?'on':'off')).join('')}</div>
+    ${stick}
     ${R.ups.length?`<p>New skill${R.ups.length>1?'s':''}: <b>${R.ups.map(esc).join(', ')}</b></p>`:''}
     <div class="mprog"><b>${esc(R.name)}</b><div class="bar"><i style="width:${mc/pool.length*100}%"></i></div><small>${mc} of ${pool.length} skills learned</small>${meter}</div>
+    <div class="lookback"><small>Look back at your answers</small><div class="lbrow">${R.hist.map((h,k)=>`<button class="lb ${h.ok?'ok':'no'}" data-k="${k}" aria-label="Look back at question ${k+1}">${k+1}</button>`).join('')}</div></div>
     <div class="toolrow" style="margin:0"><button class="btn big pulse" id="againBtn">Keep going →</button><button class="btn ghost" id="mapBtn">Done</button></div>`;
-  $('#over').hidden=false;if(P.read)speak(`You got ${ok} star${ok===1?'':'s'}! Tap Keep going for more!`,'cheer');
+  $('#over').hidden=false;
+  if(!quiet){sfx('fan');if(ok>=5)bigConfetti();if(R.got.length)setTimeout(()=>sfx('stick'),700);
+    if(P.read)speak(`${ok===ROUND?'Perfect round!':`You got ${ok} star${ok===1?'':'s'}!`} ${R.got.length?`You won a ${R.got.map(a=>a[1]).join(' and a ')} sticker!`:''} Tap Keep going for more!`,'cheer')}
+  document.querySelectorAll('.lb').forEach(b=>b.onclick=()=>review(+b.dataset.k,()=>endRound(true)));
   $('#againBtn').onclick=()=>{$('#over').hidden=true;startRound(R.pool,R.name)};$('#mapBtn').onclick=()=>{$('#over').hidden=true;go('map')};
 }
 $('#quitBtn').onclick=()=>{clearTimers();try{speechSynthesis.cancel()}catch(e){}$('#over').hidden=true;go('map')};
