@@ -276,6 +276,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .recrow .rt{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}.recrow .rt small{color:var(--muted);font-weight:400}
 .btn.sm{font-size:.9rem;padding:6px 12px;box-shadow:none}
 .btn:disabled{opacity:.45}
+.ghsave{display:grid;gap:8px;border-top:2px dashed var(--line);padding-top:12px;margin-top:4px}
+.ghsave input{flex:1 1 220px;min-width:0;font:inherit;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -377,9 +379,18 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
     <div class="top"><button class="iconbtn" id="recBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Your voice</h2></div>
     <div class="hero" id="recIntro">
       <p style="margin:0">Read each big line out loud, then pause for a beat. The app hears the pause, saves the clip, and moves to the next line by itself. About 5 minutes.</p>
-      <p class="hint" style="margin:0">Use a quiet room. Recordings stay on this device and are never uploaded.</p>
+      <p class="hint" style="margin:0">Use a quiet room. Recordings save on this device until you tap Save to GitHub below.</p>
       <p class="hint" style="margin:0;font-weight:700" id="recIntroMsg"></p>
       <div class="row"><button class="btn" id="recStart">Start reading</button><button class="btn ghost" id="recMissing" hidden>Record missing lines</button></div>
+      <div class="ghsave">
+        <b>Use on every device</b>
+        <p class="hint" style="margin:0">Saves your recordings to the Math Climb GitHub repo, like Habla. Every iPad, phone and computer picks them up.</p>
+        <div id="ghTokWrap" class="vrow"><input type="password" id="ghTok" placeholder="GitHub token (one time)" autocomplete="off"></div>
+        <p class="hint" id="ghTokNote" hidden style="margin:0">GitHub token saved on this device. <button class="link" id="ghTokChange" type="button" style="padding:0">Change</button></p>
+        <div class="vrow"><button class="btn" id="ghSave" type="button">Save to GitHub</button></div>
+        <p class="hint" id="ghPending" style="margin:0"></p>
+        <p class="hint" id="ghMsg" aria-live="polite" style="margin:0;font-weight:700"></p>
+      </div>
     </div>
     <div class="hero" id="recLive" hidden>
       <span class="skillname" id="recSec"></span>
@@ -880,7 +891,7 @@ function idb(){return IDBP||(IDBP=new Promise((res,rej)=>{try{const q=indexedDB.
 async function idbAll(){try{const db=await idb();return await new Promise(res=>{const out={};const c=db.transaction('clips').objectStore('clips').openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else res(out)};c.onerror=()=>res(out)})}catch(e){return{}}}
 async function idbPut(k,v){try{const db=await idb();await new Promise(res=>{const tx=db.transaction('clips','readwrite');tx.objectStore('clips').put(v,k);tx.oncomplete=tx.onerror=()=>res()})}catch(e){}}
 async function idbDel(k){try{const db=await idb();await new Promise(res=>{const tx=db.transaction('clips','readwrite');tx.objectStore('clips').delete(k);tx.oncomplete=tx.onerror=()=>res()})}catch(e){}}
-idbAll().then(all=>{Object.assign(VR,all);if(!$('#home').hidden)renderVoicePicker()});
+idbAll().then(all=>{Object.assign(VR,all);if(!$('#home').hidden)renderVoicePicker();loadRepoClips()});
 
 /* playback */
 function actx(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
@@ -945,7 +956,7 @@ function recFrame(x){const R0=REC;if(!R0)return;const f=new Float32Array(x),idx=
 function recSave(a,b){const R0=REC,it=R0.items[R0.pos];if(!it)return;a=Math.max(0,a);
   const out=new Float32Array(b-a);for(const [i0,f] of R0.chunks)for(let j=0;j<f.length;j++){const g=i0+j;if(g>=a&&g<b)out[g-a]=f[j]}
   R0.chunks=R0.chunks.filter(([i0,f])=>i0+f.length>b);
-  const v=encodeClip(out,R0.sr);VR[it.k]=v;delete VC[it.k];idbPut(it.k,v);R0.last=it;R0.pos++;
+  const v={...encodeClip(out,R0.sr),src:'me'};VR[it.k]=v;delete VC[it.k];idbPut(it.k,v);R0.last=it;R0.pos++;
   const now=$('#recNow');now.classList.remove('got');void now.offsetWidth;now.classList.add('got');
   renderRecList();if(R0.single||R0.pos>=R0.items.length){recFinish();return}showLine();recMsg('Got it. Next line.')}
 function recFinish(silent){const R0=REC;if(!R0)return;REC=null;try{R0.pr.onaudioprocess=null;R0.src.disconnect();R0.pr.disconnect();R0.mute.disconnect()}catch(e){}
@@ -959,6 +970,7 @@ function renderRecList(){
   const L=$('#recList');L.innerHTML=h;
   L.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{const it=S[+b.dataset.play];const id=++SPK_ID;stopClips();playClips([it.k],id,()=>{})});
   L.querySelectorAll('[data-redo]').forEach(b=>b.onclick=()=>{window.scrollTo(0,0);recRun([S[+b.dataset.redo]],true)});
+  ghUi();
 }
 $('#recStart').onclick=()=>recRun(voiceScript());
 $('#recMissing').onclick=()=>recRun(voiceScript().filter(x=>!VR[x.k]));
@@ -967,8 +979,52 @@ $('#recSkip').onclick=()=>{const R0=REC;if(!R0)return;R0.pos++;R0.state='wait';R
 $('#recStop').onclick=()=>recFinish();
 $('#recBack').onclick=()=>{recFinish(true);go('home')};
 $('#recClear').onclick=()=>{const c=$('#recClearOk');c.hidden=!c.hidden};
-$('#recClearYes').onclick=async()=>{for(const k of Object.keys(VR)){delete VR[k];delete VC[k];await idbDel(k)}$('#recClearOk').hidden=true;renderRecList()};
+$('#recClearYes').onclick=async()=>{for(const k of Object.keys(VR)){delete VR[k];delete VC[k];await idbDel(k)}$('#recClearOk').hidden=true;renderRecList();$('#ghMsg').textContent='Deleted on this device. Tap Save to GitHub to remove them everywhere.'};
 $('#myVoiceBtn').onclick=()=>{$('#recIntroMsg').textContent='';go('rec')};
+
+/* ---------- share recordings through the GitHub repo (same approach as Habla) ----------
+   recordings.json sits next to index.html. Every device loads it on start.
+   Clips recorded here are marked src:'me' and win over the repo copy until they are saved to GitHub. */
+const GH_REPO='ghrh2025/math-climb',GH_TOK='mathclimb_gh_token';
+const b64e=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+const b64d=str=>{const s=atob(str),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer};
+function ghTokGet(){try{return localStorage.getItem(GH_TOK)||''}catch(e){return ''}}
+function ghTokSet(t){try{t?localStorage.setItem(GH_TOK,t):localStorage.removeItem(GH_TOK)}catch(e){}}
+async function loadRepoClips(){
+  if(typeof fetch!=='function')return;
+  try{const r=await fetch('recordings.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
+    for(const [k,v] of Object.entries(j.clips||{})){if(VR[k]&&VR[k].src==='me')continue;const c={sr:v.sr,pcm:b64d(v.d),src:'repo'};VR[k]=c;delete VC[k];idbPut(k,c)}
+    /* a clip deleted from the repo on another device: drop our old repo copy */
+    for(const k of Object.keys(VR))if(VR[k].src==='repo'&&!(j.clips||{})[k]){delete VR[k];delete VC[k];idbDel(k)}
+    if(!$('#home').hidden)renderVoicePicker();if(!$('#rec').hidden)renderRecList();
+  }catch(e){}
+}
+async function ghSave(){
+  const msg=$('#ghMsg'),tok=($('#ghTok').value||'').trim()||ghTokGet();
+  if(!tok){msg.textContent='Paste your GitHub token first.';$('#ghTokWrap').hidden=false;return}
+  const btn=$('#ghSave');btn.disabled=true;msg.textContent='Saving to GitHub…';
+  try{
+    const H={'Authorization':'Bearer '+tok,'Accept':'application/vnd.github+json'};
+    const url=`https://api.github.com/repos/${GH_REPO}/contents/recordings.json`;
+    let sha;const m=await fetch(url,{headers:H});
+    if(m.status===401||m.status===403){ghTokSet('');throw new Error('GitHub did not accept the token. Check it can write to math-climb, then paste it again.')}
+    if(m.ok)sha=(await m.json()).sha;
+    const clips={};for(const [k,v] of Object.entries(VR))clips[k]={sr:v.sr,d:b64e(v.pcm)};
+    const body=JSON.stringify({v:1,saved:new Date().toISOString(),clips});
+    const p=await fetch(url,{method:'PUT',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({message:`Voice recordings: ${Object.keys(clips).length} lines`,content:b64e(new TextEncoder().encode(body).buffer),...(sha?{sha}:{})})});
+    if(!p.ok){const e=await p.json().catch(()=>({}));if(p.status===401||p.status===403)ghTokSet('');throw new Error('GitHub said: '+(e.message||p.status))}
+    ghTokSet(tok);$('#ghTok').value='';
+    for(const [k,v] of Object.entries(VR)){v.src='repo';idbPut(k,v)}
+    msg.textContent=`Saved ${Object.keys(clips).length} lines. Other devices get them in about a minute after they reopen the app.`;
+  }catch(e){msg.textContent=e.message||'Could not reach GitHub. Check the internet and try again.'}
+  btn.disabled=false;ghUi();
+}
+function ghUi(){const has=!!ghTokGet(),local=Object.values(VR).filter(v=>v.src==='me').length;
+  $('#ghTokWrap').hidden=has;$('#ghTokNote').hidden=!has;
+  $('#ghPending').textContent=local?`${local} new line${local===1?'':'s'} not saved to GitHub yet.`:'Everything is saved.'}
+$('#ghSave').onclick=ghSave;
+$('#ghTokChange').onclick=()=>{ghTokSet('');ghUi()};
+
 $('#myVoiceChk').onchange=e=>{DB.myVoice=e.target.checked;save();speak('Great job!','cheer')};
 
 /* ---------- navigation (rec added) ---------- */
