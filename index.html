@@ -264,6 +264,18 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
 .avatar.hasbud{font-size:2.2rem!important}
 #mAv{cursor:pointer}
 .budbig{font-size:84px;line-height:1;animation:hop 1.2s ease 1}
+.tele{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,9vw,3.6rem);line-height:1.1;text-align:center;padding:18px 8px;border-radius:18px;background:var(--pcsoft);text-wrap:balance}
+.tele small{display:block;font-family:var(--body);font-size:1rem;color:var(--muted);margin-top:6px}
+.tele.got{animation:got .5s ease}@keyframes got{30%{background:var(--goodbg);transform:scale(1.03)}}
+.telenext{color:var(--muted);font-weight:700;text-align:center;margin:0}
+.lvl{height:10px}.lvl i{transition:width .08s linear}
+.reclist{display:grid;gap:6px}
+.recsec{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:12px 0 2px}
+.recrow{display:flex;align-items:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:6px 8px 6px 12px}
+.recrow.has{border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
+.recrow .rt{flex:1;min-width:0;font-weight:700;overflow-wrap:anywhere}.recrow .rt small{color:var(--muted);font-weight:400}
+.btn.sm{font-size:.9rem;padding:6px 12px;box-shadow:none}
+.btn:disabled{opacity:.45}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -290,6 +302,10 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
       <div class="vrow"><select id="voiceSel"></select><button class="btn ghost" id="voiceTest" type="button">Test</button></div>
       <p class="hint" id="voiceNote"></p>
       <label class="check"><input type="checkbox" id="sndChk"> Sound effects (chimes and fanfares)</label>
+      <span style="font-weight:700;margin-top:8px">Your voice</span>
+      <p class="hint" id="myVoiceNote">Read a short script once, and the app cheers and asks the little-kid questions in your voice.</p>
+      <div class="vrow"><button class="btn ghost" id="myVoiceBtn" type="button">Record your voice</button></div>
+      <label class="check"><input type="checkbox" id="myVoiceChk"> Use my recorded voice</label>
       <p class="hint">On iPad, a more natural voice is free: Settings, Accessibility, Spoken Content, Voices, English. Download an "Enhanced" or "Premium" voice, then pick it here.</p>
     </div>
   </section>
@@ -354,6 +370,29 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pc);outline-off
     </div>
     <div class="answers" id="answers"></div>
     <div class="fb" id="fb" aria-live="polite"></div>
+  </section>
+
+  <!-- YOUR VOICE -->
+  <section id="rec" hidden>
+    <div class="top"><button class="iconbtn" id="recBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Your voice</h2></div>
+    <div class="hero" id="recIntro">
+      <p style="margin:0">Read each big line out loud, then pause for a beat. The app hears the pause, saves the clip, and moves to the next line by itself. About 5 minutes.</p>
+      <p class="hint" style="margin:0">Use a quiet room. Recordings stay on this device and are never uploaded.</p>
+      <p class="hint" style="margin:0;font-weight:700" id="recIntroMsg"></p>
+      <div class="row"><button class="btn" id="recStart">Start reading</button><button class="btn ghost" id="recMissing" hidden>Record missing lines</button></div>
+    </div>
+    <div class="hero" id="recLive" hidden>
+      <span class="skillname" id="recSec"></span>
+      <div class="tele" id="recNow"></div>
+      <p class="telenext" id="recNext"></p>
+      <div class="bar lvl" aria-hidden="true"><i id="recLvl"></i></div>
+      <p class="hint" id="recState" aria-live="polite" style="margin:0"></p>
+      <div class="row"><button class="btn ghost" id="recUndo">Redo last</button><button class="btn ghost" id="recSkip">Skip</button><button class="btn" id="recStop">Done</button></div>
+    </div>
+    <h3 class="sect" style="margin-top:18px">Lines <small class="hint" id="recCount" style="font-family:var(--body);font-weight:700"></small></h3>
+    <div class="reclist" id="recList"></div>
+    <p style="margin-top:18px"><button class="link" id="recClear">Delete all recordings</button></p>
+    <div class="confirm" id="recClearOk" hidden><p>Delete every recorded line on this device?</p><button class="btn" id="recClearYes" style="--pc:var(--bad)">Delete</button></div>
   </section>
 
   <!-- GRID -->
@@ -803,7 +842,7 @@ function voiceList(){try{return speechSynthesis.getVoices().filter(v=>voiceScore
 function loadVoice(){const L=voiceList();VOICE=(DB.voice&&L.find(v=>v.name===DB.voice))||L[0]||null;if(!$('#home').hidden)renderVoicePicker()}
 try{loadVoice();speechSynthesis.onvoiceschanged=loadVoice}catch(e){}
 const MOOD={q:[.95,1.05],cheer:[1.05,1.25],calm:[.92,1]};
-function speak(t,mood='q',done){try{if(!('speechSynthesis' in window)){done&&done();return}speechSynthesis.cancel();
+function tts(t,mood='q',done){try{if(!('speechSynthesis' in window)){done&&done();return}speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(speakable(t));if(VOICE){u.voice=VOICE;u.lang=VOICE.lang}
   const natural=VOICE&&/Natural|Neural|Premium|Enhanced/i.test(VOICE.name);const [rt,pt]=MOOD[mood]||MOOD.q;
   u.rate=rt;u.pitch=natural?1+(pt-1)/2:pt; /* natural voices already have expression; nudge them less */
@@ -815,8 +854,126 @@ function renderVoicePicker(){
 }
 
 /* ---------- navigation ---------- */
-const SECTIONS=['home','add','map','play','grid'];
-function go(id){SECTIONS.forEach(s=>$('#'+s).hidden=s!==id);$('#buddy').hidden=id!=='play'||!(P&&P.buddy);window.scrollTo(0,0);if(id==='home')renderHome();if(id==='map')renderMap();if(id==='add')renderAdd();if(id==='grid')renderGrid()}
+/* ---------- family voice ----------
+   A grown-up reads a script of short lines; the app splits on pauses and files each clip under its line.
+   speak() then builds any sentence it can from those clips, sentence by sentence, and falls back to the
+   device voice only for sentences it cannot build. Clips live in IndexedDB on this device only. */
+const NUMW={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20};
+const NUMSAY=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty'];
+const TENSAY={30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety',100:'one hundred'};
+function vnorm(t){return String(t).toLowerCase().replace(/[’‘]/g,"'").replace(/[^a-z0-9' ]+/g,' ').split(/\s+/).filter(Boolean).map(w=>w in NUMW?String(NUMW[w]):w).join(' ')}
+function voiceScript(){
+  const S=[];const add=(sec,arr)=>arr.forEach(t=>S.push({sec,t,k:vnorm(t)}));
+  add('Cheers',['Yes!','Nice!','You got it!','Great job!','Awesome!','Super!','Woo-hoo!','Wow!','in a row!','Perfect round!','You got','stars!','star!','Tap Keep going for more!','You reached the top of the mountain!']);
+  add('Helping',['Good try.',"It's",'the','The answer is','Tap an answer.','Listen to the question.','Then tap the answer you think is right!','Pick your buddy!','Tap an animal.','Tap Play.','Or pick a game.']);
+  add('Names',DB.players.map(p=>`Hi ${p.name}!`));
+  add('Questions',['How many?','Which is more','or','What comes next?','What number comes before','Tap the','plus','minus','equals','plus what makes','plus what equals','How much is a','Count the tally marks.','longest one','shortest one','cents']);
+  add('Shapes and coins',['circle','square','triangle','rectangle','oval','cone','cube','sphere','cylinder','pyramid','penny','nickel','dime','quarter']);
+  add('Numbers',[...Array(21).keys()].map(String).concat(['30','40','50','60','70','80','90','100']));
+  const seen=new Set();return S.filter(x=>!seen.has(x.k)&&seen.add(x.k));
+}
+const sayHint=x=>/^\d+$/.test(x.t)?(NUMSAY[+x.t]||TENSAY[x.t]||''):'';
+
+/* storage */
+const VR={},VC={};let IDBP=null;
+function idb(){return IDBP||(IDBP=new Promise((res,rej)=>{try{const q=indexedDB.open('mathclimb-voice',1);q.onupgradeneeded=()=>q.result.createObjectStore('clips');q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}catch(e){rej(e)}}))}
+async function idbAll(){try{const db=await idb();return await new Promise(res=>{const out={};const c=db.transaction('clips').objectStore('clips').openCursor();c.onsuccess=()=>{const cur=c.result;if(cur){out[cur.key]=cur.value;cur.continue()}else res(out)};c.onerror=()=>res(out)})}catch(e){return{}}}
+async function idbPut(k,v){try{const db=await idb();await new Promise(res=>{const tx=db.transaction('clips','readwrite');tx.objectStore('clips').put(v,k);tx.oncomplete=tx.onerror=()=>res()})}catch(e){}}
+async function idbDel(k){try{const db=await idb();await new Promise(res=>{const tx=db.transaction('clips','readwrite');tx.objectStore('clips').delete(k);tx.oncomplete=tx.onerror=()=>res()})}catch(e){}}
+idbAll().then(all=>{Object.assign(VR,all);if(!$('#home').hidden)renderVoicePicker()});
+
+/* playback */
+function actx(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function clipBuf(k){if(VC[k])return VC[k];const v=VR[k],a=actx();if(!v||!a)return null;const i16=new Int16Array(v.pcm),b=a.createBuffer(1,i16.length,v.sr),d=b.getChannelData(0);for(let i=0;i<i16.length;i++)d[i]=i16[i]/32768;return VC[k]=b}
+function useMine(){return DB.myVoice!==false&&Object.keys(VR).length>0}
+function clipKeys(sentence){
+  const t=vnorm(sentence).split(' ').filter(Boolean),out=[];let i=0;
+  while(i<t.length){let hit=false;
+    for(let L=Math.min(7,t.length-i);L>=1;L--){const k=t.slice(i,i+L).join(' ');if(VR[k]){out.push(k);i+=L;hit=true;break}}
+    if(hit)continue;
+    if(/^\d+$/.test(t[i])){const n=+t[i],tn=String(n-n%10),on=String(n%10);if(n>20&&n<100&&VR[tn]&&(n%10===0||VR[on])){out.push(tn);if(n%10)out.push(on);i++;continue}}
+    return null}
+  return out}
+let SPK_ID=0,SRC=[];
+function stopClips(){SRC.forEach(s=>{try{s.stop()}catch(e){}});SRC=[]}
+function playClips(keys,id,done){const a=actx();if(!a||!keys.length){done();return}
+  let t=a.currentTime+.03;keys.forEach(k=>{const b=clipBuf(k);if(!b)return;const s=a.createBufferSource();s.buffer=b;s.connect(a.destination);s.start(t);SRC.push(s);t+=b.duration+.06});
+  setTimeout(()=>{if(id===SPK_ID)done()},(t-a.currentTime)*1000+60)}
+function speak(t,mood='q',done){
+  const id=++SPK_ID;stopClips();
+  if(useMine()){const text=speakable(t),parts=(text.match(/[^.!?]+[.!?]*/g)||[]).map(s=>s.trim()).filter(s=>/[a-z0-9]/i.test(s));
+    const plan=parts.map(s=>({s,k:clipKeys(s)}));
+    if(plan.some(p=>p.k&&p.k.length)){try{speechSynthesis.cancel()}catch(e){}let i=0;
+      const step=()=>{if(id!==SPK_ID)return;if(i>=plan.length){done&&done();return}const p=plan[i++];if(p.k)playClips(p.k,id,step);else tts(p.s,mood,step)};step();return}}
+  tts(t,mood,done)}
+
+/* recorder: teleprompter that advances on each pause */
+let REC=null;
+function encodeClip(x,sr){
+  const d=Math.max(1,Math.round(sr/24000)),n=Math.floor(x.length/d),y=new Float32Array(n);
+  for(let i=0;i<n;i++){let s=0;for(let j=0;j<d;j++)s+=x[i*d+j];y[i]=s/d}
+  let pk=0;for(const v of y)pk=Math.max(pk,Math.abs(v));const g=pk>0?Math.min(6,.9/pk):1,fd=Math.round(.008*sr/d);
+  const i16=new Int16Array(n);for(let i=0;i<n;i++){let v=y[i]*g;if(i<fd)v*=i/fd;if(i>n-fd)v*=(n-i)/fd;i16[i]=Math.max(-32767,Math.min(32767,Math.round(v*32767)))}
+  return{sr:sr/d,pcm:i16.buffer}}
+function recMsg(t){$('#recState').textContent=t}
+function showLine(){const R0=REC,it=R0.items[R0.pos],nx=R0.items[R0.pos+1];
+  $('#recSec').textContent=`${it.sec} · line ${R0.pos+1} of ${R0.items.length}`;
+  $('#recNow').innerHTML=`${esc(it.t)}${sayHint(it)?`<small>say “${sayHint(it)}”</small>`:''}`;
+  $('#recNext').textContent=nx?'Next: '+nx.t:'Last one!';$('#recUndo').disabled=!R0.last}
+async function recRun(items,single){
+  if(REC)recFinish(true);if(!items.length)return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#recIntroMsg').textContent='This browser cannot record. Use Safari on the iPad.';return}
+  try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}})}
+  catch(e){$('#recIntroMsg').textContent='The microphone is blocked. On iPad: Settings, Safari, Microphone, Allow. Then try again.';return}
+  const a=actx();try{await a.resume()}catch(e){}
+  const src=a.createMediaStreamSource(stream),pr=a.createScriptProcessor(2048,1,1),mute=a.createGain();mute.gain.value=0;src.connect(pr);pr.connect(mute);mute.connect(a.destination);
+  REC={stream,src,pr,mute,items,pos:0,sr:a.sampleRate,chunks:[],total:0,noise:[],thr:.02,state:'cal',loudRun:0,single,last:null};
+  $('#recIntro').hidden=true;$('#recLive').hidden=false;showLine();recMsg('Getting ready… stay quiet for a second');
+  pr.onaudioprocess=e=>recFrame(e.inputBuffer.getChannelData(0));
+}
+function recFrame(x){const R0=REC;if(!R0)return;const f=new Float32Array(x),idx=R0.total;R0.chunks.push([idx,f]);R0.total+=f.length;
+  let s=0;for(let i=0;i<f.length;i++)s+=f[i]*f[i];const rms=Math.sqrt(s/f.length);$('#recLvl').style.width=Math.min(100,rms*500)+'%';
+  if(R0.state==='cal'){R0.noise.push(rms);if(R0.noise.length>=12){const m=R0.noise.slice().sort((a,b)=>a-b)[6];R0.thr=Math.min(.09,Math.max(.012,m*4));R0.state='wait';recMsg('Read the big line, then pause')}while(R0.chunks.length>14)R0.chunks.shift();return}
+  const loud=rms>R0.thr;
+  if(R0.state==='wait'){if(loud){R0.loudRun++;if(R0.loudRun>=2){R0.state='speak';R0.start=idx-f.length;R0.lastVoice=idx+f.length;recMsg('Listening…')}}else R0.loudRun=0;while(R0.chunks.length>14)R0.chunks.shift();return}
+  if(loud)R0.lastVoice=idx+f.length;
+  const hang=(idx+f.length-R0.lastVoice)/R0.sr,len=(R0.lastVoice-R0.start)/R0.sr;
+  if(hang>=.5){R0.state='wait';R0.loudRun=0;if(len>=.12)recSave(R0.start-Math.round(.12*R0.sr),R0.lastVoice+Math.round(.1*R0.sr));else recMsg('Read the big line, then pause')}
+  else if(len>8){R0.state='wait';R0.loudRun=0;recMsg('That was long. Read only the big line, then pause.')}
+}
+function recSave(a,b){const R0=REC,it=R0.items[R0.pos];if(!it)return;a=Math.max(0,a);
+  const out=new Float32Array(b-a);for(const [i0,f] of R0.chunks)for(let j=0;j<f.length;j++){const g=i0+j;if(g>=a&&g<b)out[g-a]=f[j]}
+  R0.chunks=R0.chunks.filter(([i0,f])=>i0+f.length>b);
+  const v=encodeClip(out,R0.sr);VR[it.k]=v;delete VC[it.k];idbPut(it.k,v);R0.last=it;R0.pos++;
+  const now=$('#recNow');now.classList.remove('got');void now.offsetWidth;now.classList.add('got');
+  renderRecList();if(R0.single||R0.pos>=R0.items.length){recFinish();return}showLine();recMsg('Got it. Next line.')}
+function recFinish(silent){const R0=REC;if(!R0)return;REC=null;try{R0.pr.onaudioprocess=null;R0.src.disconnect();R0.pr.disconnect();R0.mute.disconnect()}catch(e){}
+  try{R0.stream.getTracks().forEach(t=>t.stop())}catch(e){}try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  $('#recLive').hidden=true;$('#recIntro').hidden=false;if(!silent){$('#recIntroMsg').textContent='Saved. Tap Play next to any line to hear it.';renderRecList()}}
+function renderRecList(){
+  const S=voiceScript(),n=S.filter(x=>VR[x.k]).length;$('#recCount').textContent=`${n} of ${S.length} lines recorded`;
+  $('#recMissing').hidden=!n||n===S.length;$('#recStart').textContent=n?'Read all lines again':'Start reading';
+  let h='',sec='';S.forEach((x,i)=>{if(x.sec!==sec){sec=x.sec;h+=`<p class="recsec">${esc(sec)}</p>`}
+    h+=`<div class="recrow${VR[x.k]?' has':''}"><span class="rt">${esc(x.t)}${sayHint(x)?` <small>(${sayHint(x)})</small>`:''}</span><button class="btn ghost sm" data-play="${i}" ${VR[x.k]?'':'disabled'}>Play</button><button class="btn ghost sm" data-redo="${i}">${VR[x.k]?'Redo':'Record'}</button></div>`});
+  const L=$('#recList');L.innerHTML=h;
+  L.querySelectorAll('[data-play]').forEach(b=>b.onclick=()=>{const it=S[+b.dataset.play];const id=++SPK_ID;stopClips();playClips([it.k],id,()=>{})});
+  L.querySelectorAll('[data-redo]').forEach(b=>b.onclick=()=>{window.scrollTo(0,0);recRun([S[+b.dataset.redo]],true)});
+}
+$('#recStart').onclick=()=>recRun(voiceScript());
+$('#recMissing').onclick=()=>recRun(voiceScript().filter(x=>!VR[x.k]));
+$('#recUndo').onclick=()=>{const R0=REC;if(!R0||!R0.last)return;R0.pos=Math.max(0,R0.pos-1);delete VR[R0.last.k];delete VC[R0.last.k];idbDel(R0.last.k);R0.last=null;R0.state='wait';R0.loudRun=0;showLine();recMsg('Read it again, then pause')};
+$('#recSkip').onclick=()=>{const R0=REC;if(!R0)return;R0.pos++;R0.state='wait';R0.loudRun=0;if(R0.pos>=R0.items.length)return recFinish();showLine()};
+$('#recStop').onclick=()=>recFinish();
+$('#recBack').onclick=()=>{recFinish(true);go('home')};
+$('#recClear').onclick=()=>{const c=$('#recClearOk');c.hidden=!c.hidden};
+$('#recClearYes').onclick=async()=>{for(const k of Object.keys(VR)){delete VR[k];delete VC[k];await idbDel(k)}$('#recClearOk').hidden=true;renderRecList()};
+$('#myVoiceBtn').onclick=()=>{$('#recIntroMsg').textContent='';go('rec')};
+$('#myVoiceChk').onchange=e=>{DB.myVoice=e.target.checked;save();speak('Great job!','cheer')};
+
+/* ---------- navigation (rec added) ---------- */
+const SECTIONS=['home','add','map','play','grid','rec'];
+function go(id){SECTIONS.forEach(s=>$('#'+s).hidden=s!==id);$('#buddy').hidden=id!=='play'||!(P&&P.buddy);window.scrollTo(0,0);if(id==='home')renderHome();if(id==='map')renderMap();if(id==='add')renderAdd();if(id==='grid')renderGrid();if(id==='rec')renderRecList()}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 function setColor(c){document.documentElement.style.setProperty('--pc',c||COLORS[0]);document.documentElement.style.setProperty('--pcsoft',`color-mix(in srgb, ${c||COLORS[0]} 16%, var(--card))`)}
 
@@ -834,6 +991,8 @@ function renderHome(){
   const a=document.createElement('button');a.className='pcard add';a.textContent='+ Add player';a.onclick=()=>go('add');box.appendChild(a);
   $('#editBtn').textContent=editing?'Done editing':'Edit players';$('#editBtn').hidden=!DB.players.length;
   renderVoicePicker();$('#sndChk').checked=DB.sound!==false;
+  {const S=voiceScript(),n=S.filter(x=>VR[x.k]).length;$('#myVoiceChk').checked=DB.myVoice!==false;$('#myVoiceChk').disabled=!n;
+   $('#myVoiceBtn').textContent=n?`Your voice: ${n} of ${S.length} lines`:'Record your voice'}
 }
 $('#editBtn').onclick=()=>{editing=!editing;$('#confirmDel').hidden=true;renderHome()};
 $('#voiceSel').onchange=e=>{DB.voice=e.target.value||null;save();loadVoice();speak("Hi! Let's do some math. What is 3 plus 4?")};
@@ -916,9 +1075,9 @@ try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){} 
 let unlocked=false;
 function unlockAudio(){if(unlocked)return;unlocked=true;
   try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
-  try{const a=ac();if(a){const b=a.createBuffer(1,1,22050),src=a.createBufferSource();src.buffer=b;src.connect(a.destination);src.start(0)}}catch(e){}}
+  try{const a=actx();if(a){const b=a.createBuffer(1,1,22050),src=a.createBufferSource();src.buffer=b;src.connect(a.destination);src.start(0)}}catch(e){}}
 ['touchend','pointerdown','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
-function ac(){if(DB.sound===false)return null;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function ac(){if(DB.sound===false)return null;return actx()}
 function tone(f,t0,d,type='triangle',v=.14){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+t0;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.05)}
 const SFX={ok:()=>{tone(784,0,.16);tone(1175,.09,.28)},no:()=>tone(233,0,.3,'sine',.1),fan:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.1,.4)),streak:()=>[659,880,1175].forEach((f,i)=>tone(f,i*.07,.22)),stick:()=>[1047,1568,2093].forEach((f,i)=>tone(f,i*.08,.25,'sine',.09))};
 function sfx(k){try{SFX[k]()}catch(e){}}
